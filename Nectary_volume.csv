@@ -1,0 +1,80 @@
+ID,Plant.ID,Location on Plant,Location,Reliability (Y means it is very reliable),Nectary Area (by trace method) / mm^2,Drop Diameter / mm,Drop height / mm,Drop Radius (A/2) / mm,Drop Volume (mm^3)
+AL01LB3A,AL01,Leafbase,Aligarh,Not perpendicular,1.187,0.674,0.21,0.337,0.124635
+AL02LB3A,AL02,Leafbase,Aligarh,Drop unclear,3.263,1.091,0.517,0.546,0.8434855
+AL02LB4A',AL02,Leafbase,Aligarh,Scale issue,3.926,1.747,0.318,0.874,0.624234
+AL03LB2A',AL03,Leafbase,Aligarh,Drop is very small,4.053,0.554,0.301,0.277,0.6099765
+AL03S1A',AL03,Petiole,Aligarh,Drop is very small,3.796,0.621,0.377,0.311,0.715546
+AL05LB1A',AL05,Leafbase,Aligarh,Drop is very small,4.234,0.498,0.347,0.249,0.734599
+AL06S1A',AL06,Petiole,Aligarh,Drop is very small,1.68,0.622,0.409,0.311,0.34356
+AL07LB1A',AL07,Leafbase,Aligarh,Drop is very small,4.919,1.368,0.25,0.684,0.614875
+AL09LB1A',AL09,Leafbase,Aligarh,Drop is very small,2.538,0.643,0.357,0.322,0.453033
+AL09S1A',AL09,Petiole,Aligarh,Drop is very small,2.887,0.602,0.318,0.301,0.459033
+AL10LB1A,AL10,Leafbase,Aligarh,Drop is very small,1.33,1.056,0.24,0.528,0.1596
+BA07LB1A',BA07,Leafbase,Bangalore,Height hard to measure,3.978,0.829,0.627,0.415,1.247103
+BA15LB4A,BA15,Leafbase,Bangalore,Not perpendicular,5.021,1.928,0.758,0.964,1.902959
+BA16LB4A',BA16,Leafbase,Bangalore,Scale issue,4.502,1.521,0.804,0.761,1.809804
+BAM1LB1A',BAM1,Leafbase,Bangalore,Y,2.703,1.014,0.386,0.507,0.521679
+BAM1S1A',BAM1,Petiole,Bangalore,Y,1.617,1.228,0.481,0.614,0.3888885
+BAM2S1A',BAM2,Petiole,Bangalore,Y,2.411,1.245,0.59,0.623,0.711245
+BAM3LB1A',BAM3,Leafbase,Bangalore,Y,6.329,0.993,0.544,0.497,1.721488
+BAM4S1A',BAM4,Petiole,Bangalore,Y,2.886,1.391,0.782,0.696,1.128426
+BAM5S1A',BAM5,Petiole,Bangalore,Y,2.495,1.35,0.47,0.675,0.586325
+BAM8S1A',BAM8,Petiole,Bangalore,Y,3.163,1.757,0.542,0.879,0.857173
+BH02S1A',BH02,Petiole,Bhopal,Scale issue,2.441,1.402,0.797,0.701,0.9727385
+BH07S1A',BH07,Petiole,Bhopal,Not perpendicular,3.08,1.807,0.879,0.904,1.35366
+BH10S1A',BH10,Petiole,Bhopal,Drop is very small,4.503,0.687,0.483,0.344,1.0874745
+BH14LB1A',BH14,Leafbase,Bhopal,Not perpendicular,6.539,1.542,0.824,0.771,2.694068
+GW06LB1A',GW06,Leafbase,Gwalior,Drop unclear,4.212,0.641,0.553,0.321,1.164618
+GW06LB2A',GW06,Leafbase,Gwalior,Drop unclear,2.5,0.833,0.334,0.417,0.4175
+HY01LB1A',HY01,Leafbase,Hyderabad,Y,6.6,0.741,0.419,0.371,1.3827
+HY01S1A',HY01,Petiole,Hyderabad,Drop unclear,6.342,1.277,0.502,0.639,1.591842
+HY01S2A',HY01,Petiole,Hyderabad,Not perpendicular,5.565,0.93,0.447,0.465,1.2437775
+HY01S3A',HY01,Petiole,Hyderabad,Y,5.95,0.76,0.347,0.38,1.032325
+HY02S1A',HY02,Petiole,Hyderabad,Y,4.986,1.189,0.508,0.595,1.266444
+HY02S2A',HY02,Petiole,Hyderabad,Y,5.343,0.721,0.29,0.361,0.774735
+HY03LB1A',HY03,Leafbase,Hyderabad,Y,0.652,0.827,0.462,0.414,0.150612
+HY03S1A',HY03,Petiole,Hyderabad,Y,4.263,0.748,0.42,0.374,0.89523
+HY03S2A',HY03,Petiole,Hyderabad,Y,2.893,0.741,0.575,0.371,0.8317375
+HY04S1A',HY04,Petiole,Hyderabad,Drop is very small,4.401,0.951,0.376,0.476,0.827388
+HY05LB1A',HY05,Leafbase,Hyderabad,Drop is very small,5.6,0.677,0.267,0.339,0.7476
+HY05S1A',HY05,Petiole,Hyderabad,Not perpendicular,3.261,0.996,0.737,0.498,1.2016785
+HY09LB1A',HY09,Leafbase,Hyderabad,Y,5.84,1.46,0.45,0.73,1.314
+HY10LB1A',HY10,Leafbase,Hyderabad,Drop is very small,5.208,0.788,,0.394,0
+HY11S1A',HY11,Petiole,Hyderabad,Drop unclear,2.903,0.636,0.355,0.318,0.5152825
+HY14LB1A',HY14,Leafbase,Hyderabad,Y,5.985,1.343,0.66,0.672,1.97505
+HY14S1A',HY14,Petiole,Hyderabad,Y,2.907,0.893,0.471,0.447,0.6845985
+HY15S1A',HY15,Petiole,Hyderabad,Not perpendicular,4.115,0.903,0.604,0.452,1.24273
+HY15S2A',HY15,Petiole,Hyderabad,Y,4.406,1.304,0.811,0.652,1.786633
+KAM1S1A',KAM1,Petiole,Kanyakumari,Not perpendicular,5.723,1.246,0.649,0.623,1.8571135
+KAM2LB1A',KAM2,Leafbase,Kanyakumari,Height hard to measure,11.586,2.135,0.91,1.068,5.27163
+KAM2S1A',KAM2,Petiole,Kanyakumari,Y,6.713,1.428,0.395,0.714,1.3258175
+KAM3LB1A',KAM3,Leafbase,Kanyakumari,Y,2.481,1.053,0.928,0.527,1.151184
+KAM3S1A',KAM3,Petiole,Kanyakumari,Y,1.863,1.062,0.82,0.531,0.76383
+KAM4LB1A',KAM4,Leafbase,Kanyakumari,Not perpendicular,4.161,1.734,1.312,0.867,2.729616
+KAM4S1A',KAM4,Petiole,Kanyakumari,Y,2.565,1.315,0.593,0.658,0.7605225
+KAM5LB1A',KAM5,Leafbase,Kanyakumari,Y,3.689,1.583,0.79,0.792,1.457155
+KAM7S1A',KAM7,Petiole,Kanyakumari,Y,1.382,0.758,0.44,0.379,0.30404
+KAM8LB1A',KAM8,Leafbase,Kanyakumari,Y,2.652,1.263,0.689,0.632,0.913614
+KAM8S1A',KAM8,Petiole,Kanyakumari,Full sphere,1.857,1.053,1.073,0.527,0.9962805
+KO01LB1A',KO01,Leafbase,Koradi,Y,2.131,0.732,0.367,0.366,0.3910385
+KO01LB2A',KO01,Leafbase,Koradi,Not perpendicular,1.751,1.08,0.923,0.54,0.8080865
+KO05LB1A',KO05,Leafbase,Koradi,Y,3.545,1.17,0.898,0.585,1.591705
+KO05S1A',KO05,Petiole,Koradi,Not perpendicular,3.078,1.52,1,0.76,1.539
+KO07LB1A',KO07,Leafbase,Koradi,Drop is very small,9.077,0.812,0.622,0.406,2.822947
+KO09LB1A',KO09,Leafbase,Koradi,Drop is very small,2.9,0.493,0.316,0.247,0.4582
+KO12LB1A',KO12,Leafbase,Koradi,Drop is very small,5.7,0.856,0.628,0.428,1.7898
+KO12S1A',KO12,Petiole,Koradi,Drop is very small,4.23,0.678,0.566,0.339,1.19709
+PB02S1A',PB02,Petiole,Portblair,Y,4.438,2.278,0.86,1.139,1.90834
+PB06S1A',PB06,Petiole,Portblair,Height hard to measure,3.8,2.241,0.919,1.121,1.7461
+PB08LB1A',PB08,Leafbase,Portblair,Not perpendicular,6.146,2.063,1.035,1.032,3.180555
+PB08S1A',PB08,Petiole,Portblair,Y,5.874,2.79,0.763,1.395,2.240931
+PB09S1A',PB09,Petiole,Portblair,Y,2.716,1.834,0.312,0.917,0.423696
+SR01S1A',SR01,Petiole,Srirangam,Drop is very small,3.377,0.39,0.246,0.195,0.415371
+SR03LB1A',SR03,Leafbase,Srirangam,Drop is very small,3.703,0.311,0.276,0.156,0.511014
+SR03S1A',SR03,Petiole,Srirangam,Drop is very small and mm scale,0.598,0.186,0.122,0.093,0.036478
+SR03S2A',SR03,Petiole,Srirangam,Drop is very small and not perpendicular,2.685,0.353,0.26,0.177,0.34905
+SR07LB1A',SR07,Leafbase,Srirangam,Drop is very small,4.25,0.496,0.29,0.248,0.61625
+SR07S1A',SR07,Petiole,Srirangam,Drop is very small and mm scale,2.885,0.477,0.374,0.239,0.539495
+SR11S1A',SR11,Petiole,Srirangam,Scale issue,1.961,0.604,0.556,0.302,0.545158
+SR12S1A',SR12,Petiole,Srirangam,Not perpendicular and mm scale,0.341,0.27,0.256,0.135,0.043648
+SR12S2A',SR12,Petiole,Srirangam,Not perpendicular,5.1,1.007,0.596,0.504,1.5198

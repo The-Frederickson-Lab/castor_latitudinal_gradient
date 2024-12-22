@@ -1,0 +1,247 @@
+ID,PlantID,Reliability Note,Nec_type,Area,Location
+AL01LB3A,AL01,NA,Leafbase,1.214,Aligarh
+AL01S1A,AL01,NA,Petiole,1.288,Aligarh
+AL01LB1A,AL01,NA,Leafbase,1.903,Aligarh
+AL02S2A,AL02,NA,Petiole,2.295,Aligarh
+AL02LB1A,AL02,NA,Leafbase,3.768,Aligarh
+AL02LB2A,AL02,NA,Leafbase,5.014,Aligarh
+AL01LB2A,AL01,NA,Leafbase,0.907,Aligarh
+AL02LB3A,AL02,NA,Leafbase,2.786,Aligarh
+AL02LB4A,AL02,NA,Leafbase,4.333,Aligarh
+AL02S1A,AL02,BOUNDRY UNCLEAR,Petiole,2.628,Aligarh
+AL03LB1A,AL03,NA,Leafbase,4.267,Aligarh
+AL03LB2A,AL03,NA,Leafbase,4.366,Aligarh
+AL03S1A,AL03,NA,Petiole,4.28,Aligarh
+AL04LB1A,AL04,NA,Leafbase,5.074,Aligarh
+AL04LB2A,AL04,NA,Leafbase,5.763,Aligarh
+AL04LB3A,AL04,NA,Leafbase,2.619,Aligarh
+AL04S1A,AL04,NA,Petiole,2.731,Aligarh
+AL04S2A,AL04,SCALE HARD TO READ,Petiole,2.485,Aligarh
+AL04S3A,AL04,NA,Petiole,2.798,Aligarh
+AL05LB1A,AL05,NA,Leafbase,4.066,Aligarh
+AL06S1A,AL06,NA,Petiole,1.65,Aligarh
+AL07LB1A,AL07,Nectary mishapen,Leafbase,4.882,Aligarh
+AL07S1A,AL07,NA,Petiole,2.953,Aligarh
+AL08LB1A,AL08,NA,Leafbase,2.926,Aligarh
+AL08LB2A,AL08,NA,Leafbase,6.222,Aligarh
+AL08LB3A,AL08,NA,Leafbase,4.452,Aligarh
+AL08LB4A,AL08,NA,Leafbase,3.854,Aligarh
+AL08S1A,AL08,NA,Petiole,0.909,Aligarh
+AL08S2A,AL08,NA,Petiole,1.975,Aligarh
+AL09LB1A,AL09,NA,Leafbase,2.47,Aligarh
+AL09S1A,AL09,NA,Petiole,2.586,Aligarh
+AL10LB1A,AL10,NA,Leafbase,1.475,Aligarh
+AL11LB1A,AL11,NA,Leafbase,2.136,Aligarh
+AL11LB3A,AL11,NA,Leafbase,3.584,Aligarh
+AL11LB4A,AL11,NA,Leafbase,2.343,Aligarh
+AL11S1A,AL11,NA,Petiole,1.051,Aligarh
+AL11S2A,AL11,NA,Petiole,1.434,Aligarh
+AL11S3A,AL11,NA,Petiole,1.305,Aligarh
+BH02S1A,BH02,NA,Petiole,1.763,Bhopal
+BH04S1A,BH04,NA,Petiole,4.253,Bhopal
+BH07S1A,BH07,NA,Petiole,2.961,Bhopal
+BH10S1A,BH10,NA,Petiole,4.372,Bhopal
+BH14LB1A,BH14,NA,Leafbase,6.354,Bhopal
+GW06LB1A,GW06,NA,Leafbase,3.588,Gwalior
+GW06LB2A,GW06,NA,Leafbase,2.494,Gwalior
+BA07LB1A,BA07,NA,Leafbase,4.174,Bangalore
+BA07LB2A,BA07,NA,Leafbase,4.105,Bangalore
+BA08LB1A,BA08,NA,Leafbase,5.551,Bangalore
+BA08S3A,BA08,NA,Petiole,3.2,Bangalore
+BA08LB3A,BA08,NA,Leafbase,4.972,Bangalore
+BA08S2A,BA08,NA,Petiole,2.738,Bangalore
+BA09LB2A,BA09,NA,Leafbase,6.87,Bangalore
+BA09LB3A,BA09,NA,Leafbase,5.968,Bangalore
+BA09LB4A,BA09,NA,Leafbase,6.585,Bangalore
+BA09S1A,BA09,NA,Petiole,4.244,Bangalore
+BA09S2A,BA09,NA,Petiole,3.769,Bangalore
+BA09S3A,BA09,NA,Petiole,2.089,Bangalore
+BA12LB1A,BA12,NA,Leafbase,4.172,Bangalore
+BA12LB3A,BA12,NA,Leafbase,8.117,Bangalore
+BA12S1A,BA12,NA,Petiole,3.727,Bangalore
+BA12S2A,BA12,NA,Petiole,3.262,Bangalore
+BA12S3A,BA12,NA,Petiole,2.071,Bangalore
+BA13LB1A,BA13,NA,Leafbase,4.472,Bangalore
+BA13LB2A,BA13,NA,Leafbase,3.801,Bangalore
+BA13S1A,BA13,BOUNDRY UNCLEAR,Petiole,1.742,Bangalore
+BA13S2A,BA13,NA,Petiole,3.846,Bangalore
+BA14LB1A,BA14,NA,Leafbase,4.551,Bangalore
+BA14LB2A,BA14,NA,Leafbase,5.293,Bangalore
+BA14LB3A,BA14,NA,Leafbase,5.339,Bangalore
+BA14S1A,BA14,NA,Petiole,5.041,Bangalore
+BA14S2A,BA14,NA,Petiole,2.461,Bangalore
+BA14S3A,BA14,NA,Petiole,2.654,Bangalore
+BA15LB4A,BA15,NA,Leafbase,5.07,Bangalore
+BA15LB1A,BA15,NA,Leafbase,5.103,Bangalore
+BA15LB2A,BA15,NA,Leafbase,6.736,Bangalore
+BA15LB3A,BA15,NA,Leafbase,5.942,Bangalore
+BA15S1A,BA15,NA,Petiole,4.892,Bangalore
+BA15S2A,BA15,NA,Petiole,2.275,Bangalore
+BA15S3A,BA15,NA,Petiole,4.785,Bangalore
+BA16LB1A,BA16,NA,Leafbase,4.661,Bangalore
+BA16LB3A,BA16,NA,Leafbase,4.43,Bangalore
+BA16LB4A,BA16,NA,Leafbase,4.844,Bangalore
+BA17LB1A,BA17,NA,Leafbase,5.822,Bangalore
+BA17LB2A,BA17,NA,Leafbase,8.659,Bangalore
+BA17LB3A,BA17,NA,Leafbase,7.287,Bangalore
+BA17LB4A',BA17,NA,Leafbase,3.779,Bangalore
+BA17S1A,BA17,NA,Petiole,7.516,Bangalore
+BA17S3A,BA17,NA,Petiole,4.896,Bangalore
+BA18LB3A,BA18,NA,Leafbase,5.077,Bangalore
+BA18LB4A,BA18,NA,Leafbase,4.395,Bangalore
+BA18S3A,BA18,NA,Petiole,2.051,Bangalore
+BA19LB1A,BA19,NA,Leafbase,3.952,Bangalore
+BA19LB2A,BA19,NA,Leafbase,3.629,Bangalore
+BA19S1A,BA19,NA,Petiole,4.221,Bangalore
+BA19S2A,BA19,NA,Petiole,1.917,Bangalore
+BA19S3A,BA19,NA,Petiole,3.575,Bangalore
+BA20LB1A,BA20,NA,Leafbase,5.255,Bangalore
+BA20LB2A,BA20,NA,Leafbase,6.495,Bangalore
+BA20LB3A,BA20,NA,Leafbase,6.428,Bangalore
+BA20S1A,BA20,NA,Petiole,5.896,Bangalore
+BA20S2A,BA20,NA,Petiole,3.665,Bangalore
+BA20S3A,BA20,NA,Petiole,6.204,Bangalore
+BAM1LB1A,BAM1,NA,Leafbase,3.042,Bangalore
+BAM1S1A,BAM1,NA,Petiole,1.456,Bangalore
+BAM2S1A,BAM2,NA,Petiole,2.431,Bangalore
+BAM3LB1A,BAM3,NA,Leafbase,6.378,Bangalore
+BAM4S1A,BAM4,NA,Petiole,3.934,Bangalore
+BAM5LB1A,BAM5,NA,Leafbase,3.212,Bangalore
+BAM5LB2A,BAM5,NA,Leafbase,2.809,Bangalore
+BAM5S1A,BAM5,NA,Petiole,2.68,Bangalore
+BAM6LB1A,BAM6,NA,Leafbase,2.366,Bangalore
+BAM7LB1A,BAM7,NA,Leafbase,3.351,Bangalore
+BAM8S1A,BAM8,NA,Petiole,2.902,Bangalore
+HY01LB1A,HY01,NA,Leafbase,9.124,Hyderabad
+HY01S1A,HY01,NA,Petiole,5.04,Hyderabad
+HY01S2A,HY01,NA,Petiole,5.323,Hyderabad
+HY01S3A,HY01,NA,Petiole,5.773,Hyderabad
+HY02S1A,HY02,NA,Petiole,4.098,Hyderabad
+HY02S2A,HY02,NA,Petiole,5.566,Hyderabad
+HY03LB1A,HY03,NA,Leafbase,6.657,Hyderabad
+HY03LB2A ,HY03,NA,Leafbase,3.786,Hyderabad
+HY03S1A,HY03,NA,Petiole,4.051,Hyderabad
+HY03S2A,HY03,NA,Petiole,3.125,Hyderabad
+HY04LB1A ,HY04,NA,Leafbase,7.321,Hyderabad
+HY04S1A,HY04,NA,Petiole,4.639,Hyderabad
+HY05LB1A,HY05,NA,Leafbase,5.702,Hyderabad
+HY05S1A,HY05,NA,Petiole,2.732,Hyderabad
+HY09LB1A,HY09,NA,Leafbase,6.159,Hyderabad
+HY10LB1A,HY10,NA,Leafbase,4.715,Hyderabad
+HY10LB2A ,HY10,NA,Leafbase,6.501,Hyderabad
+HY11S1A,HY11,NA,Petiole,2.743,Hyderabad
+HY14LB1A,HY14,NA,Leafbase,6.27,Hyderabad
+HY14LB2A ,HY14,NA,Leafbase,4.169,Hyderabad
+HY14S1A,HY14,NA,Petiole,2.815,Hyderabad
+HY15LB1A ,HY15,Nectary mishapen,Leafbase,4.3,Hyderabad
+HY15LB2A ,HY15,NA,Leafbase,6.111,Hyderabad
+HY15S1A,HY15,NA,Petiole,4.076,Hyderabad
+HY15S2A,HY15,NA,Petiole,4.752,Hyderabad
+PB02LB1A,PB02,NA,Leafbase,7.216,Portblair
+PB02S1A,PB02,NA,Petiole,4.763,Portblair
+PB05LB1A,PB05,NA,Leafbase,3.603,Portblair
+PB06LB1A,PB06,NA,Leafbase,4.398,Portblair
+PB06LB2A,PB06,NA,Leafbase,3.392,Portblair
+PB06S1A,PB06,NA,Petiole,3.842,Portblair
+PB08LB1A,PB08,NA,Leafbase,6.11,Portblair
+PB08S1A,PB08,NA,Petiole,5.603,Portblair
+PB09S1A,PB09,NA,Petiole,2.64,Portblair
+SR01S1A,SR01,NA,Petiole,3.682,Srirangam
+SR02LB1A ,SR02,NA,Leafbase,4.979,Srirangam
+SR03LB2A ,SR03,mm scale OUTLIER!!!,Leafbase,0.692,Srirangam
+SR03S1A,SR03,mm scale OUTLIER!!!,Petiole,0.487,Srirangam
+SR03S2A,SR03,NA,Petiole,2.52,Srirangam
+SR05LB1A ,SR05,mm scale OUTLIER!!!,Leafbase,3.67,Srirangam
+SR07LB1A,SR07,NA,Leafbase,4.398,Srirangam
+SR07S1A,SR07,NA,Petiole,2.925,Srirangam
+SR11LB1A ,SR11,NA,Leafbase,3.033,Srirangam
+SR11LB2A,SR11,NA,Leafbase,2.022,Srirangam
+SR11S1A,SR11,NA,Petiole,2.011,Srirangam
+SR12LB1A,SR12,mm scale OUTLIER!!!,Leafbase,1.134,Srirangam
+SR12LB2A,SR12,NA,Leafbase,7.099,Srirangam
+SR12LB3A,SR12,mm scale OUTLIER!!!,Leafbase,1.041,Srirangam
+SR12S1A,SR12,mm scale OUTLIER!!!,Petiole,0.311,Srirangam
+SR12S2A,SR12,NA,Petiole,4.745,Srirangam
+KO01LB2A,KO01,"Scale at an angle, FUSION",Leafbase,2.1125,Koradi
+KO03LB1A,KO03,NA,Leafbase,2.969,Koradi
+KO03LB2A,KO03,NA,Leafbase,3.339,Koradi
+KO04LB1A,KO04,Has 2 drops,Leafbase,4.203,Koradi
+KO05LB1A,KO05,NA,Leafbase,3.745,Koradi
+KO05S1A,KO05,NA,Petiole,2.828,Koradi
+KO07LB1A,KO07,"MAYBE FUSED, OUTLIER",Leafbase,8.564,Koradi
+KO09LB1A,KO09,NA,Leafbase,3.08,Koradi
+KO12LB1A,KO12,NA,Leafbase,5.264,Koradi
+KO14LB1A,KO14,NA,Leafbase,3.63,Koradi
+KA01LB1A,KA01,NA,Leafbase,8.028,Kanyakumari
+KA01LB2A,KA01,SCALE HARD TO READ,Leafbase,8.419,Kanyakumari
+KA01LB3A,KA01,NA,Leafbase,8.188,Kanyakumari
+KA01S1A,KA01,NA,Petiole,5.074,Kanyakumari
+KA01S2A,KA01,SCALE HARD TO READ,Petiole,4.449,Kanyakumari
+KA03LB1A,KA03,NA,Leafbase,3.894,Kanyakumari
+KA03LB2A,KA03,NA,Leafbase,5.549,Kanyakumari
+KA03LB3A,KA03,NA,Leafbase,4.796,Kanyakumari
+KA03S1A,KA03,NA,Petiole,5.425,Kanyakumari
+KA03S2A,KA03,NA,Petiole,3.011,Kanyakumari
+KA04LB1A,KA04,NA,Leafbase,3.705,Kanyakumari
+KA04LB2A,KA04,NA,Leafbase,4.851,Kanyakumari
+KA04S1A,KA04,NA,Petiole,3.711,Kanyakumari
+KA04S2A,KA04,NA,Petiole,2.256,Kanyakumari
+KA04S3A,KA04,NA,Petiole,1.741,Kanyakumari
+KA05LB1A,KA05,NA,Leafbase,5.854,Kanyakumari
+KA05LB2A,KA05,SCALE HARD TO READ,Leafbase,6.982,Kanyakumari
+KA05LB3A,KA05,NA,Leafbase,6.327,Kanyakumari
+KA05S1A,KA05,NA,Petiole,2.928,Kanyakumari
+KA05S2A,KA05,NA,Petiole,5.02,Kanyakumari
+KA05S3A,KA05,NA,Petiole,4.701,Kanyakumari
+KA06LB2A,KA06,BOUNDRY UNCLEAR,Leafbase,7.851,Kanyakumari
+KA06LB3A,KA06,NA,Leafbase,8.362,Kanyakumari
+KA06S1A,KA06,NA,Petiole,7.127,Kanyakumari
+KA06S3A,KA06,NA,Petiole,2.71,Kanyakumari
+KA07LB1A,KA07,NA,Leafbase,9.649,Kanyakumari
+KA08LB1A,KA08,NA,Leafbase,9.392,Kanyakumari
+KA08LB2A,KA08,NA,Leafbase,8.982,Kanyakumari
+KA08LB3A,KA08,NA,Leafbase,7.378,Kanyakumari
+KA09LB4A,KA09,NA,Leafbase,7.782,Kanyakumari
+KA09LB1A,KA09,NA,Leafbase,9.056,Kanyakumari
+KA09LB2A,KA09,NA,Leafbase,7.821,Kanyakumari
+KA09LB3A,KA09,NA,Leafbase,7.086,Kanyakumari
+KA09S2A,KA09,NA,Petiole,5.511,Kanyakumari
+KA09S3A,KA09,NA,Petiole,3.441,Kanyakumari
+KA10LB1A,KA10,NA,Leafbase,7.609,Kanyakumari
+KA10LB2A,KA10,NA,Leafbase,9.313,Kanyakumari
+KA10LB3A,KA10,NA,Leafbase,7.446,Kanyakumari
+KA10S1A,KA10,NA,Petiole,7.991,Kanyakumari
+KA11LB1A,KA11,NA,Leafbase,8.286,Kanyakumari
+KA11LB2A,KA11,NA,Leafbase,7.185,Kanyakumari
+KA11LB3A,KA11,NA,Leafbase,8.668,Kanyakumari
+KA11S1A,KA11,NA,Petiole,4.512,Kanyakumari
+KA11S2A,KA11,NA,Petiole,5.373,Kanyakumari
+KA12LB1A,KA12,NA,Leafbase,7.335,Kanyakumari
+KA12LB2A,KA12,NA,Leafbase,7.298,Kanyakumari
+KA12LB4A,KA12,NA,Leafbase,4.298,Kanyakumari
+KA12S1A,KA12,NA,Petiole,3.908,Kanyakumari
+KA13LB2A,KA13,NA,Leafbase,5.624,Kanyakumari
+KA13S1A,KA13,NA,Petiole,4.636,Kanyakumari
+KA13S2A,KA13,NA,Petiole,4.528,Kanyakumari
+KA14LB1A,KA14,NA,Leafbase,9.516,Kanyakumari
+KA14LB2A,KA14,NA,Leafbase,7.115,Kanyakumari
+KA14S1A,KA14,NA,Petiole,4.469,Kanyakumari
+KA15LB1A,KA15,NA,Leafbase,6.365,Kanyakumari
+KA15LB3A,KA15,NA,Leafbase,6.451,Kanyakumari
+KA15S1A,KA15,NA,Petiole,6.084,Kanyakumari
+KAM1S1A,KAM1,NA,Petiole,5.552,Kanyakumari
+KAM2LB1A,KAM2,NA,Leafbase,11.303,Kanyakumari
+KAM2S1A,KAM2,NA,Petiole,6.642,Kanyakumari
+KAM3LB1A,KAM2,NA,Leafbase,2.571,Kanyakumari
+KAM3S1A,KAM3,NA,Petiole,1.848,Kanyakumari
+KAM4LB1A,KAM4,NA,Leafbase,4.202,Kanyakumari
+KAM4S1A,KAM4,NA,Petiole,2.594,Kanyakumari
+KAM5LB1A,KAM5,NA,Leafbase,3.561,Kanyakumari
+KAM5LB2A,KAM5,NA,Leafbase,2.99,Kanyakumari
+KAM6LB1A,KAM6,BOUNDRY UNCLEAR,Leafbase,1.569,Kanyakumari
+KAM6LB2A,KAM6,BOUNDRY UNCLEAR,Leafbase,1.69,Kanyakumari
+KAM7LB2A,KAM7,NA,Leafbase,2.871,Kanyakumari
+KAM7S1A,KAM7,NA,Petiole,1.394,Kanyakumari
+KAM8LB1A,KAM8,NA,Leafbase,2.47,Kanyakumari
+KAM8LB2A,KAM8,BOUNDRY UNCLEAR,Leafbase,2.269,Kanyakumari
+KAM8S1A,KAM8,BOUNDRY UNCLEAR,Petiole,1.776,Kanyakumari

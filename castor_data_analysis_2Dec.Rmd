@@ -1,0 +1,1475 @@
+---
+title: "Castor_latitudinal_gradient"
+author: "Pooja Nathan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+##Latitudinal gradients in species interactions
+
+In this study, we sampled populations of the castor plant, Ricinus communis, across a large latitudinal range in the Indian subcontinent to understand if, when the host species is kept constant, there is variation in mutualistic traits and interactions across latitude as posited by the biotic interactions hypothesis.
+
+```{r importing packages, echo = FALSE}
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(ggplot2)
+library(ggspatial)
+library(ggpubr)
+library(cowplot)
+library(gridExtra)
+library(patchwork)
+library(grid)
+library(lavaan)
+library(piecewiseSEM)
+library(ggforce)
+library(lme4)
+library(car)
+library(raster)
+library(scales)
+library(sf)
+library(magick)
+library(vegan)
+library(ggrepel)
+library(terra)
+library(sp)
+library(corrplot)
+library(viridis)
+```
+Let's make a plot of all sites sampled on a map of India
+
+```{r plotting all sites on a map}
+
+#Read shapefile
+#shapefile_path <- "gadm41_IND_shp/gadm41_IND_0.shp"
+shapefile_path <- "India_Country_Boundary.shp"
+india <- st_read(shapefile_path)
+
+
+#Set latitude and longitude of sites
+Site <- c("Ramnagar", "Aligarh", "Gwalior", "Bhopal","Nagpur", "Hyderabad", 
+          "Hampi", "Bangalore","Port Blair", "Srirangam", "Kanyakumari" )
+Lat <- c(29.40, 27.89, 26.23, 23.22, 21.25, 17.33, 15.34, 13.07, 11.62, 10.86, 8.08)
+Lon <- c(79.13, 78.03, 78.26, 77.38, 79.08, 78.44, 76.46, 77.53, 92.73, 78.70, 77.52)
+
+sites <- data.frame(Site, Lat, Lon)
+
+sites_sf <- st_as_sf(sites, coords = c("Lon", "Lat"), crs = 4326)
+
+degree_label <- function(x) {
+  paste0(x, "\u00B0")
+}
+# Transform india and sites_sf to UTM (select appropriate zone for India)
+india <- st_transform(india, crs = 32644) # UTM Zone 44N (adjust for your region)
+sites_sf <- st_transform(sites_sf, crs = 32644)
+
+# Redraw the map
+indmap <- ggplot(data = india) +
+  geom_sf() +
+  geom_sf(data = sites_sf, aes(color = ifelse(Site == "Port Blair", "turquoise", "olivedrab")), size = 3.5) +
+  scale_x_continuous(labels = degree_label) +
+  scale_y_continuous(labels = degree_label) +
+  labs(x = "Longitude", y = "Latitude") +
+  theme_minimal() +
+  scale_color_identity() + 
+  annotation_scale(location = "bl", width_hint = 0.2) +  # Scale bar in bottom left
+  annotation_north_arrow(location = "tl",                # Compass rose in top left
+                         which_north = "true",           # True north
+                         pad_x = unit(0.5, "cm"), 
+                         pad_y = unit(0.5, "cm"),
+                         style = north_arrow_fancy_orienteering())
+```
+
+##Data cleaning
+
+Now, let's import and clean all the trait and interaction data
+
+```{r reading in and cleaning up data}
+
+#Reading in plant traits dataset
+morph <- read.csv("morph_natint_20May24.csv")
+names(morph)[names(morph) == "Site"] <- "Location"
+names(morph)[names(morph) == "Width.at.10.cm"] <- "width"
+names(morph)[names(morph) == "Number.of.fruits"] <- "fruitno"
+names(morph)[names(morph) == "Number.of.branches"] <- "branchno"
+names(morph)[names(morph) == "Plant ID"] <- "Plant.ID"
+morph$Latitude <- as.numeric(morph$Latitude)
+morph$Phenology <- as.factor(morph$Phenology)
+morph$width <- as.numeric(morph$width)
+morph$branchno <- as.numeric(morph$branchno)
+morph$fruitno <- as.numeric(morph$fruitno)
+
+
+#reading in nectary size dataset
+efnarea <- read.csv("Nectary_areas.csv")
+efnarea$Location <- as.factor(efnarea$Location)
+efnarea$Nec_type <- as.factor(efnarea$Nec_type)
+efnarea$Nec_type <- as.factor(efnarea$Nec_type)
+names(efnarea)[names(efnarea) == "PlantID"] <- "Plant.ID"
+
+#Clean up, average when multiple measurements are available for the same individual/type of EFN
+efnarea <- efnarea %>%
+  group_by(Plant.ID, Nec_type) %>%
+  summarize(
+    Area = mean(Area, na.rm = TRUE),
+    Location = first(Location)
+  )
+
+#converting to wideform
+
+efnarea <- efnarea %>%
+  pivot_wider(names_from = Nec_type, values_from = Area, 
+              names_prefix = "Area_") %>%
+  dplyr::select(Plant.ID, Area_Leafbase, Area_Petiole, Location)
+
+#Reading in nectar volume dataset
+volume <- read.csv("Nectary_volume.csv")
+
+#volume <- merge(volume, lat, by = "Location")
+names(volume)[names(volume) == "Drop.Volume..mm.3."] <- "dropvol"
+names(volume)[names(volume) == "Location.on.Plant"] <- "Type"
+
+
+volume <- volume %>% 
+  group_by(Plant.ID, Type) %>% 
+  summarise(meanvol = mean(dropvol, na.rm = TRUE),
+    Location = first(Location)) 
+
+#converting to wideform
+volume <- volume %>%
+  pivot_wider(names_from = Type, values_from = meanvol, 
+              names_prefix = "Vol_") %>%
+  dplyr::select(Plant.ID, Vol_Leafbase, Vol_Petiole, Location)
+
+#Reading in seed dataset
+seeds <- read.csv("Seed and elaiosome weights.csv")
+names(seeds)[names(seeds) == "Site"] <- "Location"
+names(seeds)[names(seeds) == "Seed.weight..g."] <- "seedweight"
+names(seeds)[names(seeds) == "Elaiosome.seed"] <- "ratio"
+#seeds <- merge(seeds, lat, by = "Location")
+
+#Reading in average ant abundance by plant
+#Calculated in the ant abundance analysis
+#Different R script
+ant_ab <- read.csv("ant_ab_by_plant.csv")
+
+morphseed <- left_join(morph, seeds, by = "Plant.ID")
+morphants <- left_join(morphseed, ant_ab, by = "Plant.ID")
+morphants$average_abundance[is.na(morphants$average_abundance)] <- 0
+
+#combining all data into one unified dataset
+all_comb <- left_join(morphants, efnarea, by = "Plant.ID")
+all_comb <- left_join(all_comb, volume, by = "Plant.ID")
+
+#removing unneeded columns
+data <- all_comb[, c(1:4, 6:27, 30:35, 37, 40, 41, 43, 44)]                         
+names(data)[names(data) == "Location.x"] <- "Location"                      
+
+```
+
+## Plots and statistical models
+
+#Correlations among variables
+
+```{r correlations and data summary}
+
+png("efn_correlations.png")
+corrplot::corrplot(cor(data[, c("EFNLB", "EFNS", "EFNL", "Area_Leafbase", "Area_Petiole", "Vol_Leafbase", "Vol_Petiole")], use="pairwise.complete.obs"))
+dev.off()
+
+#EFN volumes are correlated to EFN areas
+#Calculate R^2 and p-value for Area_Leafbase vs Vol_Leafbase
+model1 <- lm(log10(Vol_Leafbase) ~ log10(Area_Leafbase), data = data)
+r_squared1 <- summary(model1)$r.squared
+p_value1 <- summary(model1)$coefficients[2, 4]
+
+area_volume_cor1 <- ggplot(data=data, aes(x=Area_Leafbase, y=Vol_Leafbase)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10() +
+  xlab("Leaf base EFNs (area, mm2)") +
+  ylab("Leaf base EFNs (volume, mm3)") +
+  geom_smooth(method="lm") +
+  theme_cowplot() +
+  annotate("text", x=2, y=2, label=paste("R^2 =", round(r_squared1, 3), "\nP =", signif(p_value1, 3)), hjust=0)
+
+#Calculate R^2 and p-value for Area_Petiole vs Vol_Petiole
+model2 <- lm(log10(Vol_Petiole) ~ log10(Area_Petiole), data = data)
+r_squared2 <- summary(model2)$r.squared
+p_value2 <- summary(model2)$coefficients[2, 4]
+
+area_volume_cor2 <- ggplot(data=data, aes(x=Area_Petiole, y=Vol_Petiole)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10() +
+  xlab("Petiole EFNs (area, mm2)") +
+  ylab("Petiole EFNs (volume, mm3)") +
+  geom_smooth(method="lm") +
+  theme_cowplot() +
+  annotate("text", x=2, y=2, label=paste("R^2 =", round(r_squared2, 3), "\nP =", signif(p_value2, 3)), hjust=0)
+
+area_volume <- plot_grid(area_volume_cor1, area_volume_cor2, labels=c("A) Leaf base EFNs", "B) Petiole EFNs"))
+
+ggsave(filename = "efn_area_volume_correlation.png", plot = area_volume, width = 12, height = 7, dpi = 300)
+
+#Number of plants at each site
+data$Location <- as.factor(data$Location)
+
+plantnos <- data %>%
+  group_by(Location) %>%
+  summarise(Number_of_Plants = n_distinct(Plant.ID))
+
+```
+
+##Statistical modelling 
+
+We will now use linear models and multivariate linear models where appropriate 
+
+```{r linear models, echo = FALSE}
+
+#Classifying as native, mainland and island sites
+data$Type <- ifelse(data$Location %in% c("Rumuruti1", "Rumuruti2"), "Native", 
+                   ifelse(data$Location == "Portblair", "Island", "Mainland"))
+
+#removing Kenya datapoints
+data <- data[!data$Location %in% c("Rumuruti1", "Rumuruti2"), ]
+
+#Multivariate linear models
+
+#Stem width at 10 cm used as a proxy for plant age
+
+#EFN number 
+mlm1 <- lm(cbind(EFNLB, EFNS) ~ Latitude + width + Type, data = data)
+#For individual coefficients for each variable
+summary(mlm1)
+#For overall differences - MANOVA
+Anova(mlm1)
+
+#EFN areas
+mlm2 <- lm(cbind(Area_Leafbase, Area_Petiole) ~ Latitude + width + Type, data = data)
+summary(mlm2)
+Anova(mlm2)
+
+
+lm6 <- lm(Vol_Leafbase ~ Area_Leafbase, data = data) 
+summary(lm6)
+
+lm7 <- lm(Vol_Petiole ~ Area_Petiole, data = data)
+summary(lm7)
+
+#EFN areas and volumes are highly correlated
+#Because we had only a small number of volume measurements 
+#And because they are correlated, we used areas as a proxy for investment
+
+#Herbivory
+
+lm8 <- lm(pherb ~ Latitude + width + average_abundance + Type, 
+          data = data)
+
+summary(lm8)
+
+#ant abundance
+
+lm9 <- lm(average_abundance ~ Latitude + width + Type, 
+          data = data)
+summary(lm9)
+
+#Seed mass, elaiosome mass
+
+mlm3 <- lm(cbind(seedweight, elaiosome.weight) ~ Latitude + width, data = data)
+summary(mlm3)
+Anova(mlm3)
+
+lm12 <- lm(ratio ~ Latitude + width, data = data)
+summary(lm12)
+
+#Fitness
+lm13 <- lm(fruitno ~ Latitude + width + branchno + pherb + Type, data = data)
+summary(lm13)
+
+```
+##Visualizing the data
+
+#Extrafloral nectaries 
+
+Data visualization for extrafloral nectary traits
+
+```{r EFNs}
+
+base_size <- 10
+
+#Extracting coefficients and p-values from MLMs
+intercept_efnlb <- coef(mlm1)["(Intercept)", "EFNLB"]
+slope_latitude_efnlb <- coef(mlm1)["Latitude", "EFNLB"]
+p_value_latitude_efnlb <- summary(mlm1)$`Response EFNLB`$coefficients["Latitude", "Pr(>|t|)"] 
+
+data$Type <- factor(data$Type, levels = c("Island", "Mainland"))
+
+#Leafbase EFNs
+p_efn_lb_1 <- ggplot(data = data, aes(x = Latitude, y = EFNLB, color = Type)) +  
+  geom_jitter(alpha = 0.7, width = 0.1, height = 0.1, size = 5) +
+  xlab("Latitude") +
+  ylab("Leaf base EFNs (no./leaf)") +
+  scale_x_continuous(limits = c(min(morph$Latitude), 43)) +
+  #scale_y_continuous(limits = c(min(morph$EFNLB), max(morph$EFNLB))) +
+  scale_color_manual(values = c("Island" = "turquoise", "Mainland" = "olivedrab")) +
+  theme_classic() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(size = base_size * 1.7),
+        axis.title = element_text(size = base_size * 1.4),
+        axis.text = element_text(size = base_size * 1.3),
+        legend.position = "none",  # Remove the legend
+        plot.margin = margin(10, 10, 10, 10)) +
+  geom_abline(intercept = intercept_efnlb, slope = slope_latitude_efnlb, color = "slategrey", size = 2) +
+  annotate("text", x = 19, y = 1.8, label = "*", size = 12, color = "black")
+
+p_inset <- ggplot(data = data, aes(x = Type, y = EFNLB, fill = Type)) +
+  geom_boxplot(width = 0.5, position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c("Island" = "turquoise", "Mainland" = "olivedrab")) +
+  scale_x_discrete(labels = c("Island" = "I", "Mainland" = "M")) +  
+  theme_classic() +
+  theme(
+    legend.position = "none",            
+    axis.title.x = element_blank(),      
+    axis.title.y = element_blank(),      
+    axis.text.x = element_text(size = 12), 
+    axis.ticks.x = element_line(),       
+    axis.text.y = element_text(size = 12)
+  )
+
+combined_plot_efnlb <- ggdraw() +
+  draw_plot(p_efn_lb_1) +
+  draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
+
+#ggsave(filename = "efnlb.png", plot = combined_plot_efnlb, width = 10, height = 7, dpi = 300)
+
+#Stem EFNs - non-significant
+
+
+p_efn_s_1 <- ggplot(data = data, aes(x = Latitude, y = EFNS, color = Type)) +  
+  geom_jitter(alpha = 0.7, width = 0.1, height = 0.1, size = 5) +
+  xlab("Latitude") +
+  ylab("Petiole EFNs (no./leaf)") +
+  scale_x_continuous(limits = c(min(morph$Latitude), 43)) +
+  #scale_y_continuous(limits = c(min(morph$EFNS), max(morph$EFNS))) +
+  scale_color_manual(values = c("Island" = "turquoise", "Mainland" = "olivedrab")) +
+  theme_classic() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(size = base_size * 1.7),
+        axis.title = element_text(size = base_size * 1.4),
+        axis.text = element_text(size = base_size * 1.3),
+        legend.position = "none",
+        plot.margin = margin(10, 10, 10, 10)) 
+
+
+p_inset <- ggplot(data = data, aes(x = Type, y = EFNS, fill = Type)) +
+  geom_boxplot(width = 0.5, position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c("Island" = "turquoise", "Mainland" = "olivedrab")) +
+  scale_x_discrete(labels = c("Island" = "I", "Mainland" = "M")) +  
+  theme_classic() +
+  theme(
+    legend.position = "none",            
+    axis.title.x = element_blank(),      
+    axis.title.y = element_blank(),      
+    axis.text.x = element_text(size = 12), 
+    axis.ticks.x = element_line(),       
+    axis.text.y = element_text(size = 12)
+  )
+
+combined_plot_efns <- ggdraw() +
+  draw_plot(p_efn_s_1) +
+  draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
+
+#ggsave(filename = "efns.png", plot = combined_plot_efns, width = 10, height = 7, dpi = 300)
+
+
+
+#EFN areas
+
+
+#Leaf base EFNs
+
+intercept_aefnlb <- coef(mlm2)["(Intercept)", "Area_Leafbase"]
+slope_latitude_aefnlb <- coef(mlm2)["Latitude", "Area_Leafbase"]
+
+p_area_lb <- ggplot(data = data, aes(x = Latitude, y = Area_Leafbase, color = Type)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.6, size = 5) +  
+  xlab("Latitude") +
+  ylab("Leaf base EFN area (mm2)") +
+  scale_x_continuous(limits = c(min(morph$Latitude), 43)) +
+  scale_color_manual(values = c(
+    "Mainland" = "olivedrab",  # Shade of green
+    "Island" = "#40e0d0"     # Light turquoise
+  )) +
+  labs(color = "Type") +  # Update legend title
+  theme_classic()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(size = base_size * 1.7),
+        axis.title = element_text(size = base_size * 1.4),
+        axis.text = element_text(size = base_size * 1.3),
+        legend.position = "none",
+        plot.margin = margin(10, 10, 10, 10)) + 
+    geom_abline(intercept = intercept_aefnlb, slope = slope_latitude_aefnlb, color = "slategrey", size = 2) +
+  annotate("text", x = 19, y = 4, label = "*", size = 12, color = "black")
+
+p_inset <- ggplot(data = data, aes(x = Type, y = Area_Leafbase, fill = Type)) +
+  geom_boxplot(width = 0.5, position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c("Island" = "turquoise", "Mainland" = "olivedrab")) +
+  scale_x_discrete(labels = c("Island" = "I", "Mainland" = "M")) +  
+  theme_classic() +
+  theme(
+    legend.position = "none",            
+    axis.title.x = element_blank(),      
+    axis.title.y = element_blank(),      
+    axis.text.x = element_text(size = 12), 
+    axis.ticks.x = element_line(),       
+    axis.text.y = element_text(size = 12)
+  )
+
+combined_plot_arealb <- ggdraw() +
+  draw_plot(p_area_lb) +
+  draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
+
+#ggsave(filename = "arealb.png", plot = combined_plot_arealb, width = 10, height = 7, dpi = 300)
+
+#Petiole EFNs
+
+intercept_aefns <- coef(mlm2)["(Intercept)", "Area_Petiole"]
+slope_latitude_aefns <- coef(mlm2)["Latitude", "Area_Petiole"]
+
+p_area_s <- ggplot(data = data, aes(x = Latitude, y = Area_Petiole, color = Type)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.6, size = 5) +  
+  xlab("Latitude") +
+  ylab("Petiole EFN area (mm2)") +
+  scale_x_continuous(limits = c(min(morph$Latitude), 43)) +
+  scale_color_manual(values = c(
+    "Mainland" = "olivedrab",  # Shade of green
+    "Island" = "#40e0d0"     # Light turquoise
+  )) +
+  labs(color = "Type") +  # Update legend title
+  theme_classic()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(size = base_size * 1.7),
+        axis.title = element_text(size = base_size * 1.4),
+        axis.text = element_text(size = base_size * 1.3),
+        legend.position = "none",
+        plot.margin = margin(10, 10, 10, 10)) + 
+    geom_abline(intercept = intercept_aefns, slope = slope_latitude_aefns, color = "slategrey", size = 2) +
+  annotate("text", x = 19, y = 4, label = "*", size = 12, color = "black")
+
+p_inset <- ggplot(data = data, aes(x = Type, y = Area_Petiole, fill = Type)) +
+  geom_boxplot(width = 0.5, position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c("Island" = "turquoise", "Mainland" = "olivedrab")) +
+  scale_x_discrete(labels = c("Island" = "I", "Mainland" = "M")) +  
+  theme_classic() +
+  theme(
+    legend.position = "none",            
+    axis.title.x = element_blank(),      
+    axis.title.y = element_blank(),      
+    axis.text.x = element_text(size = 12), 
+    axis.ticks.x = element_line(),       
+    axis.text.y = element_text(size = 12)
+  )
+
+combined_plot_areas <- ggdraw() +
+  draw_plot(p_area_s) +
+  draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
+
+#ggsave(filename = "areas.png", plot = combined_plot_areas, width = 10, height = 7, dpi = 300)
+
+#EFN volumes
+
+#Leaf base EFNs
+
+p_volume_lb <- ggplot(data = data, aes(x = Latitude, y = Vol_Leafbase, color = Type)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.6, size = 5) +  
+  geom_smooth(method = "lm", se = TRUE, color = "grey") +
+  xlab("Latitude") +
+  ylab("Leaf base EFN volume") +
+  scale_x_continuous(limits = c(min(morph$Latitude), 43)) +
+  scale_color_manual(values = c(
+    "Mainland" = "olivedrab",  # Shade of green
+    "Island" = "#40e0d0"     # Light turquoise
+  )) +
+  labs(color = "Type") +  # Update legend title
+  theme_minimal()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(size = base_size * 1.7),
+        axis.title = element_text(size = base_size * 1.4),
+        axis.text = element_text(size = base_size * 1.3),
+        legend.text = element_text(size = base_size * 1.3),
+        legend.title = element_text(size = base_size * 1.5),
+        plot.margin = margin(10, 10, 10, 10))
+
+p_inset <- ggplot(data = data, aes(x = Type, y = Vol_Leafbase, fill = Type)) +
+  geom_boxplot(width = 0.5, position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c( "Island" = "turquoise", "Mainland" = "olivedrab")) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(size = base_size * 0.7),
+        axis.text.y = element_text(size = base_size * 0.7))
+
+combined_plot_vollb <- ggdraw() +
+  draw_plot(p_volume_lb) +
+  draw_plot(p_inset, x = 0.75, y = 0.7, width = 0.25, height = 0.25)
+
+#ggsave(filename = "vollb.png", plot = combined_plot_vollb, width = 10, height = 7, dpi = 300)
+
+#Petiolar EFNs
+
+p_volume_s <- ggplot(data = data, aes(x = Latitude, y = Vol_Petiole, color = Type)) +
+  geom_point(position = position_jitter(width = 0.3), alpha = 0.6, size = 5) +  
+  geom_smooth(method = "lm", se = TRUE, color = "grey") +
+  xlab("Latitude") +
+  ylab("Petiole EFN volume") +
+  scale_x_continuous(limits = c(min(morph$Latitude), 40)) +
+  scale_color_manual(values = c(
+    "Mainland" = "olivedrab",  # Shade of green
+    "Island" = "#40e0d0"     # Light turquoise
+  )) +
+  labs(color = "Type") +  # Update legend title
+  theme_minimal()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(size = base_size * 1.7),
+        axis.title = element_text(size = base_size * 1.4),
+        axis.text = element_text(size = base_size * 1.3),
+        legend.text = element_text(size = base_size * 1.3),
+        legend.title = element_text(size = base_size * 1.5),
+        plot.margin = margin(10, 10, 10, 10))
+
+p_inset <- ggplot(data = data, aes(x = Type, y = Vol_Petiole, fill = Type)) +
+  geom_boxplot(width = 0.5, position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c( "Island" = "turquoise", "Mainland" = "olivedrab")) +
+  theme_void() +
+  theme(legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(size = base_size * 0.7),
+        axis.text.y = element_text(size = base_size * 0.7))
+
+combined_plot_vols <- ggdraw() +
+  draw_plot(p_volume_s) +
+  draw_plot(p_inset, x = 0.75, y = 0.7, width = 0.25, height = 0.25)
+
+#ggsave(filename = "volumes.png", plot = combined_plot_vols, width = 10, height = 7, dpi = 300)
+```
+
+
+```{r Herbivory and ant visits}
+
+#Herbivory
+
+intercept_herb <- coef(lm8)["(Intercept)"]
+slope_latitude_herb <- coef(lm8)["Latitude"]
+
+p_herb1 <- ggplot(data = data, aes(x = Latitude, y = pherb, color = Type)) +
+  geom_jitter(alpha = 0.7, width = 0.1, height = 0.1, size = 5) +
+  xlab("Latitude") +
+  ylab("Prop. of leaves with herbivory") +
+  scale_x_continuous(limits = c(min(morph$Latitude), 43)) +
+  scale_color_manual(values = c( "Island" = "turquoise", "Mainland" = "olivedrab")) +
+  theme_classic()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(size = base_size * 1.7),
+        axis.title = element_text(size = base_size * 1.4),
+        axis.text = element_text(size = base_size * 1.3),
+        legend.position = "none",
+        plot.margin = margin(10, 10, 10, 10)) + 
+    geom_abline(intercept = intercept_herb, slope = slope_latitude_herb, color = "slategrey", size = 2) +
+  annotate("text", x = 19, y = 0.5, label = "*", size = 12, color = "black")
+
+p_inset <- ggplot(data = data, aes(x = Type, y = pherb, fill = Type)) +
+  geom_boxplot(width = 0.3, position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c("Island" = "turquoise", "Mainland" = "olivedrab")) +
+  scale_x_discrete(labels = c("Island" = "I", "Mainland" = "M")) +  
+  theme_classic() +
+  theme(
+    legend.position = "none",            
+    axis.title.x = element_blank(),      
+    axis.title.y = element_blank(),      
+    axis.text.x = element_text(size = 12), 
+    axis.ticks.x = element_line(),       
+    axis.text.y = element_text(size = 12)
+  ) +
+  annotate("text", x = 1.5, y = 0.8, label = "*", size = 8, color = "black")
+
+#Combine the plots using cowplot
+combined_plot_herb <- ggdraw() +
+  draw_plot(p_herb1) +
+  draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
+
+#ggsave(filename = "herb.png", plot = combined_plot_herb, width = 12, height = 7, dpi = 300)
+
+
+#ant visitation rates
+
+intercept_ant <- coef(lm9)["(Intercept)"]
+slope_latitude_ant <- coef(lm9)["Latitude"]
+
+
+p_ants1 <- ggplot(data = data, aes(x = Latitude, y = average_abundance, color = Type)) +
+  geom_jitter(alpha = 0.7, width = 0.1, height = 0.1, size = 5) +
+  xlab("Latitude") +
+  ylab("Average ant visits (no./leaf)") +
+  scale_x_continuous(limits = c(min(morph$Latitude), 43)) +
+  scale_color_manual(values = c( "Island" = "turquoise", "Mainland" = "olivedrab")) +
+  theme_classic() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(size = base_size * 1.7),
+        axis.title = element_text(size = base_size * 1.4),
+        axis.text = element_text(size = base_size * 1.3),
+        legend.position = "none",
+        plot.margin = margin(10, 10, 10, 10)) + 
+    geom_abline(intercept = intercept_ant, slope = slope_latitude_ant, color = "slategrey", size = 2) +
+  annotate("text", x = 19, y = 9, label = "*", size = 12, color = "black")
+
+p_inset <- ggplot(data = data, aes(x = Type, y = average_abundance, fill = Type)) +
+  geom_boxplot(width = 0.5, position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c("Island" = "turquoise", "Mainland" = "olivedrab")) +
+  scale_x_discrete(labels = c("Island" = "I", "Mainland" = "M")) +  
+  theme_classic() +
+  theme(
+    legend.position = "none",            
+    axis.title.x = element_blank(),      
+    axis.title.y = element_blank(),      
+    axis.text.x = element_text(size = 12), 
+    axis.ticks.x = element_line(),       
+    axis.text.y = element_text(size = 12)
+  )
+
+#Combine the plots using cowplot
+combined_plot_ants <- ggdraw() +
+  draw_plot(p_ants1) +
+  draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
+
+
+#ggsave(filename = "combined_plot_ants.png", plot = combined_plot_ants, width = 12, height = 7, dpi = 300)
+
+```
+
+```{r Making Fig. 1 and 2}
+
+
+#Figure 1
+
+#Create a legend
+legend_plot <- ggplot(data = data.frame(Type = c("Island", "Mainland"), x = 1:2, y = 1:2), 
+                      aes(x, y, color = Type)) +
+  geom_point(size = 5) + 
+  scale_color_manual(values = c("Island" = "turquoise", "Mainland" = "olivedrab")) +
+  theme_void() + 
+  guides(color = guide_legend(override.aes = list(shape = 16)))  
+
+common_legend <- get_legend(legend_plot)
+
+
+#Add it to the map
+indmap <- plot_grid(indmap, common_legend, nrow = 2, rel_heights = c(1, 0.2))
+
+ggsave("Indiamap.png", indmap, width = 8, height = 6)
+
+
+###Figure 2
+
+
+#Combine the second row with 4 plots
+second_row <- (combined_plot_efnlb + combined_plot_efns) +
+  plot_layout(ncol = 2)
+
+#Combine the third row with 2 plots
+third_row <- (combined_plot_arealb + combined_plot_areas) +
+  plot_layout(ncol = 2)
+
+fourth_row <- (combined_plot_herb + combined_plot_ants) +
+  plot_layout(ncol = 2)
+
+#Combine the three rows into one layout
+combined_plot <-  second_row / third_row / fourth_row
+
+#Annotate with labels for subplots (a-i)
+final_plot <- combined_plot +
+  plot_annotation(tag_levels = 'a')  # Labels from a onwards
+
+
+# Display the final plot
+print(final_plot)
+
+# Save the final plot to a file
+ggsave("figure2.png", final_plot, width = 11.5, height = 12)
+
+```
+
+#How does seed size and elaiosome/seed mass vary across latitude?
+
+```{r seeds}
+#How does seed size and elaiosome weight vary across latitude?
+
+#Seeds were placed on scale and total weight was divided by number of seeds
+#For each source plant
+
+#Seed weight
+p_seedwt <- ggplot(data = data, aes(x = Latitude, y = seedweight)) +
+  geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE, color = "saddlebrown") +
+  xlab("Latitude") +
+  ylab("Seed weight") +
+  ggtitle("Variation in seed weight across latitude") 
+
+#Seed to elaiosome weight ratio
+p_seedrat <- ggplot(data = data, aes(x = Latitude, y = ratio)) +
+  geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE, color = "saddlebrown") +
+  xlab("Latitude") +
+  ylab("Elaiosome weight to seed weight ratio") +
+  ggtitle("Variation in e/s ratio across latitude") 
+  
+
+```
+
+##Visualizing plant traits
+
+```{r Plant traits}
+#How do plant traits vary across latitude?
+
+
+#Stem width
+p_width <- ggplot(data = data, aes(x = Latitude, y = width)) +
+  geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+  stat_summary(fun.data = "median_hilow", geom = "errorbar", width = 0.2) +
+  geom_smooth(method = "lm", se = TRUE, color = "black") +
+  xlab("Latitude") +
+  ylab("Stem width at 10 cm") +
+  ggtitle("Variation in stem width with latitude") 
+
+
+#Branches
+p_branch <- ggplot(data = data, aes(x = Latitude, y = as.numeric(branchno))) +
+  geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE, color = "black") +
+  xlab("Latitude") +
+  ylab("Number of branches") +
+  ggtitle("Variation in no. of branches with latitude") 
+
+#Heights
+p_height <- ggplot(data = data, aes(x = Latitude, y = as.numeric(Height))) +
+  geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE, color = "black") +
+  xlab("Latitude") +
+  ylab("Plant height") +
+  ggtitle("Variation in plant height with latitude") 
+
+#leaf size
+p_leaf <- ggplot(data = data, aes(x = Latitude, y = areaavg)) +  
+  geom_point( alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE, color = "olivedrab") +
+  xlab("Latitude") +
+  ylab("Proxy of leaf area") +
+  ggtitle("Variation in leaf size across latitude") +
+  scale_y_continuous(limits = c(min(morph$areaavg), max(morph$areaavg)))
+
+
+#fruitsize
+p_fruit <- ggplot(data = data, aes(x = Latitude, y = Fruit_size_avg)) +  
+  geom_point( alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE, color = "olivedrab") +
+  xlab("Latitude") +
+  ylab("Radius of fruits") +
+  ggtitle("Variation in fruit size across latitude") +
+  scale_y_continuous(limits = c(min(morph$Fruit_size_avg), max(morph$Fruit_size_avg)))
+
+
+#number of fruits
+p_fit <- ggplot(data = data, aes(x = Latitude, y = fruitno)) +
+  geom_point(position = position_jitter(width = 0.2), alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE, color = "slateblue") +
+  xlab("Latitude") +
+  ylab("Number of fruits") 
+
+
+```
+##Ant community analysis
+
+
+Here, we will generate some plots to understand how scan number and and number of days scanned affect ant abundance data trends. Inferences from these plots will be used to control for sampling effort in the main data analysis of this study.
+
+```{r Exploratory plots}
+ants <- read.csv("Ant_abundance_all_natint_20May24.csv") #read in the abundance dataset
+ants$Site <- as.factor(ants$Site) 
+
+#Making sure formats are correct
+ants$number1 <- as.numeric(as.character(ants$number1))
+ants$number2 <- as.numeric(as.character(ants$number2))
+ants$number3 <- as.numeric(as.character(ants$number3))
+ants$number4 <- as.numeric(as.character(ants$number4))
+
+#Removing Kenya points
+ants <- ants %>%
+  filter(!Site %in% c("Rumuruti1", "Rumuruti2"))
+
+
+#Convering to long form
+ants_long_data <- ants%>%
+  pivot_longer(
+    cols = starts_with("species") | starts_with("number") | starts_with("feeding"),
+    names_to = c(".value", "group"),
+    names_pattern = "(species|number|feeding)(\\d)"
+  ) %>% drop_na(species)
+
+#Calculating cumulative species counts
+cumulative_species_count <- ants_long_data %>%
+  group_by(Plant.ID, scan_no) %>%
+distinct(species, .keep_all = TRUE) %>%
+  ungroup() %>%
+arrange(Plant.ID, scan_no) %>%
+  group_by(Plant.ID) %>%
+mutate(cumulative_species = cumsum(!duplicated(species))) %>%
+  ungroup()
+
+stabilization_data <- cumulative_species_count %>%
+  group_by(Site, scan_no) %>%  # Group by both Site and scan_no
+  summarise(
+    mean_species = mean(cumulative_species, na.rm = TRUE),
+    sd_species = sd(cumulative_species, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+
+p <- ggplot() +
+  # Site-level mean cumulative species line
+  geom_line(
+    data = stabilization_data, 
+    aes(x = scan_no, y = mean_species, color = Site), 
+    size = 1
+  ) +
+  # Ribbon for standard deviation
+  geom_ribbon(
+    data = stabilization_data, 
+    aes(x = scan_no, ymin = mean_species - sd_species, ymax = mean_species + sd_species, fill = Site), 
+    alpha = 0.2
+  ) +
+  geom_vline(xintercept = 6, linetype = "dashed", color = "red") +  # Highlight scan 6
+  facet_wrap(~ Site, scales = "free_y") +  # Facet by site
+  theme_minimal() +
+  labs(
+    title = "Average cumulative number of ant species by number of scans",
+    x = "Number of Scans",
+    y = "Mean Cumulative Number of Unique Species"
+  ) +
+  theme(legend.position = "none")
+
+#6 scans
+
+#Choosing how many days to include
+
+species_per_plant <- ants_long_data %>%
+  group_by(Site, Plant.ID, scan_day) %>%
+  summarise(species_list = list(unique(species)), .groups = 'drop') %>%
+  arrange(Site, Plant.ID, scan_day) %>%
+  group_by(Site, Plant.ID) %>%
+  mutate(
+    cumulative_species_list = lapply(seq_along(species_list), function(x) unique(unlist(species_list[1:x]))),
+    cumulative_species_count = sapply(cumulative_species_list, length)
+  ) %>%
+  ungroup()
+
+# Summarize cumulative species counts across plants for each site
+summary_species_per_day <- species_per_plant %>%
+  group_by(Site, scan_day) %>%
+  summarise(
+    mean_cumulative_species = mean(cumulative_species_count, na.rm = TRUE),
+    sd_cumulative_species = sd(cumulative_species_count, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
+# Plot individual plant curves and site-level summary
+p_days_plants <- ggplot() +
+  # Site-level mean cumulative species line
+  geom_line(data = summary_species_per_day, 
+            aes(x = scan_day, y = mean_cumulative_species, color = Site), 
+            size = 1) +
+  # Ribbon for standard deviation
+  geom_ribbon(data = summary_species_per_day, 
+              aes(x = scan_day, ymin = mean_cumulative_species - sd_cumulative_species, 
+                  ymax = mean_cumulative_species + sd_cumulative_species, fill = Site), 
+              alpha = 0.2) +
+  facet_wrap(~ Site, scales = "free_x") +  # Facet by site
+  theme_minimal() +
+  labs(
+    title = "Average cumulative ant species across scan days",
+    x = "Scan Day",
+    y = "Cumulative unique species count"
+  ) +
+  theme(legend.position = "none")
+
+
+scans_days_plot <-  p / p_days_plants
+
+#Annotate with labels for subplots (a-i)
+scans_days_plot <- scans_days_plot +
+  plot_annotation(tag_levels = 'A')
+
+ggsave("figureS2.png", scans_days_plot, width = 7, height = 10)
+
+#Generate a list of ant species seen at each site
+ant_species_summary <- ants_long_data %>%
+  group_by(Site) %>%
+  summarise(Ant_Species = paste(unique(species), collapse = ", ")) %>%
+  arrange(Site)
+
+#View the summarized data
+print(ant_species_summary)
+
+unique_ant_species <- ants_long_data %>%
+  dplyr::select(species) %>%
+  distinct() %>%
+  pull(species)
+
+# Count the total number of unique species
+total_ant_species <- length(unique_ant_species)
+
+
+#Save the output to a CSV file
+#write.csv(ant_species_summary, "ant_species_summary.csv", row.names = FALSE)
+```
+
+
+Using the vegan package to investigate how ant communities vary across latitude
+
+
+```{r community characteristics, echo=FALSE}
+ants <- read.csv("Ant_abundance_all_natint_20May24.csv") #read in the abundance dataset
+
+ants$number1 <- as.numeric(as.character(ants$number1))
+ants$number2 <- as.numeric(as.character(ants$number2))
+ants$number3 <- as.numeric(as.character(ants$number3))
+ants$number4 <- as.numeric(as.character(ants$number4))
+
+#Removing Kenya points
+ants <- ants %>%
+  filter(!Site %in% c("Rumuruti1", "Rumuruti2"))
+
+ants_long_data <- ants%>%
+  pivot_longer(
+    cols = starts_with("species") | starts_with("number") | starts_with("feeding"),
+    names_to = c(".value", "group"),
+    names_pattern = "(species|number|feeding)(\\d)"
+  ) %>% drop_na(species)
+
+#this took out all the zero abundances
+
+write.csv(ants_long_data, "ant_ab_all_long.csv")
+
+#averaging across scans 1 to 6 for all days
+averaged_data1 <- ants_long_data %>%
+  filter(scan_no %in% 1:6) %>% 
+  group_by(Plant.ID, scan_day, species) %>% #
+  summarise(average_abundance = mean(number, na.rm = TRUE), .groups = 'drop') 
+
+#Averaging across days for all plants
+averaged_data2 <- averaged_data1 %>%
+  group_by(Plant.ID, species) %>% 
+  summarise(average_abundance = mean(average_abundance, na.rm = TRUE), .groups = 'drop') 
+
+
+#merging to get site IDs and latitudes
+site_lat_mapping <- ants_long_data %>%
+  dplyr::select(Plant.ID, Site, Lat) %>% 
+  distinct() 
+
+final_data <- merge(averaged_data2, site_lat_mapping, all.x = TRUE, all.y = FALSE)
+
+#Averaging for sites
+averaged_data3 <- final_data %>%
+  group_by(Site, Lat, species) %>% 
+  summarise(average_abundance = mean(average_abundance, na.rm = TRUE), .groups = 'drop') 
+
+species_abundance_matrix <- averaged_data3 %>%
+  pivot_wider(names_from = species, values_from = average_abundance, values_fill = list(average_abundance = 0)) %>%
+  dplyr::select(-Lat) %>%
+  distinct()
+
+latitude_data <- averaged_data3 %>%
+  dplyr::select(Site, Lat) %>%
+  distinct()
+
+final_matrix <- left_join(species_abundance_matrix, latitude_data, by = "Site")
+
+
+#Characterizing community composition
+sp_arranged <- final_matrix %>% 
+  dplyr::arrange(Lat)
+
+sp_final  <- sp_arranged %>% 
+  dplyr::select(-Lat, -Site)
+
+#calculating diversity indices
+
+simpson <- diversity(sp_final,index = "simpson")
+shannon <- diversity(sp_final)
+richness <- specnumber(sp_final)
+
+par(mfrow = c(1, 2))  
+plot(simpson)
+plot(shannon)
+
+par(mfrow = c(1, 2))  
+hist(simpson)
+hist(shannon)
+
+diversity_data <- data.frame(
+  Site = sp_arranged$Site,
+  Latitude = sp_arranged$Lat,
+  Shannon = shannon,
+  Richness = richness
+)
+
+#Define categories for colours
+diversity_data$Category <- ifelse(diversity_data$Site %in% c("Rumuruti1", "Rumuruti2"), "Native",
+                                  ifelse(diversity_data$Site == "Portblair", "Island", "Naturalized"))
+
+
+diversity_data$Category <- ifelse(diversity_data$Site == "Portblair", "Island", "Mainland")
+
+color_mapping <- c( "Island" = "turquoise", "Mainland" = "olivedrab")
+
+
+lm_shannon <- lm(Shannon ~ Latitude, data = diversity_data)
+summary(lm_shannon)
+
+lm_richness <- lm(Richness ~ Latitude, data = diversity_data)
+summary(lm_richness)
+#Non-significant
+
+#Let's run a linear model without Ramnagar
+diversity_data1 <- diversity_data %>%
+  filter(!Site == "Ramnagar")
+lm_shannon1 <- lm(Shannon ~ Latitude, data = diversity_data1)
+summary(lm_shannon1)
+#Marginally significant
+
+lm_richness1 <- lm(Richness ~ Latitude, data = diversity_data1)
+summary(lm_richness1)
+#Significant
+
+#Let's remove port blair, the island site
+diversity_data2 <- diversity_data %>%
+  filter(!Site == "Portblair")
+lm_shannon2 <- lm(Shannon ~ Latitude, data = diversity_data2)
+summary(lm_shannon2)
+#Not significant
+
+lm_richness2 <- lm(Richness ~ Latitude, data = diversity_data2)
+summary(lm_richness2)
+#Not Significant
+
+#Let's remove both
+diversity_data3 <- diversity_data %>%
+  filter(!Site %in% c("Portblair", "Ramnagar"))
+
+lm_shannon3 <- lm(Shannon ~ Latitude, data = diversity_data3)
+summary(lm_shannon3)
+#Not significant
+
+lm_richness3 <- lm(Richness ~ Latitude, data = diversity_data3)
+summary(lm_richness3)
+#Significant Significant
+
+
+r_squared_shannon <- summary(lm_shannon)$r.squared
+r_squared_richness <- summary(lm_richness)$r.squared
+
+p_value_shannon <- summary(lm_shannon)$coefficients[2, 4]
+p_value_richness <- summary(lm_richness)$coefficients[2, 4]
+
+label_shannon <- paste0("R² = ", format(r_squared_shannon, digits = 3), 
+                        ", p-value = ", format(p_value_shannon, digits = 3))
+label_richness <- paste0("R² = ", format(r_squared_richness, digits = 3), 
+                         ", p-value = ", format(p_value_richness, digits = 3))
+
+richness_plot <- ggplot(diversity_data, aes(x = Latitude, y = Richness, color = Category)) +
+  geom_point(size = 6) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  xlab("Latitude") +
+  ylab("Species Richness") +
+  scale_color_manual(values = color_mapping) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(size = 17),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 15),
+    legend.position = "bottom",
+    legend.text = element_text(size = 13),
+    legend.title = element_text(size = 14)
+  ) +
+  annotate("text", x = Inf, y = Inf, label = label_richness, 
+           hjust = 1.1, vjust = 2, size = 7, color = "black")
+
+shannon_plot <- ggplot(diversity_data, aes(x = Latitude, y = Shannon, color = Category)) +
+  geom_point(size = 6) +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  xlab("Latitude") +
+  ylab("Shannon Diversity") +
+  scale_color_manual(values = color_mapping) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(size = 17),
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 15),
+    legend.position = "bottom",
+    legend.text = element_text(size = 13),
+    legend.title = element_text(size = 14)
+  ) +
+  annotate("text", x = Inf, y = Inf, label = label_shannon, 
+           hjust = 1.1, vjust = 2, size = 7, color = "black")
+
+
+#Combine 
+divplot <- richness_plot + shannon_plot + plot_layout(guides = 'collect') & theme(legend.position = 'none') 
+
+#ggsave(filename = "diversity1s.png", plot = divplot, width = 10, height = 6, dpi = 300)
+
+#Calculating distances 
+par(mfrow = c(1, 2))
+bray = vegdist(sp_final, "bray") 
+gower = vegdist(sp_final, "gower")
+hist(bray, xlim = range(0.0,1.0))
+hist(gower, xlim = range(0.0,1.0))
+
+par(mfrow = c(1, 2))
+plot(bray)
+plot(gower)
+
+spAbund <- rowSums(sp_final)  #gives the number of individuals found in each plot
+spAbund #view observations per plot 
+
+raremin <- min(rowSums(sp_final))
+
+
+#NMDS
+sp_nmds  <- sp_arranged %>% 
+  dplyr::select(-Lat)
+
+spnmds <- as.data.frame(sp_nmds)
+
+rownames(spnmds) = spnmds[,1]
+
+#Remove the first column from the data frame
+spnmds = spnmds[,-1]
+
+NMDS=metaMDS(spnmds, k=2)
+
+#Basic NMDS plot
+#plot NMDS with site names and ant species
+
+plot(NMDS)
+
+dev.new()
+ordiplot(NMDS, type ='n') #Ordination plot function especially for congested plots
+orditorp(NMDS,display="species",col="red",air=0.01) #The function adds text or points to ordination plots
+orditorp(NMDS,display="sites",cex=1.25,air=0.01)
+
+sites_scores <- scores(NMDS, display = "sites")
+df_sites <- as.data.frame(sites_scores)
+df_sites$Latitude <- sp_arranged$Lat
+
+
+#Normalize latitude values to range between 0 and 1
+normalized_lat <- (sp_arranged$Lat - min(sp_arranged$Lat)) / (max(sp_arranged$Lat) - min(sp_arranged$Lat))
+
+#Use a color gradient function to map normalized latitudes to colors
+colors <- colorRampPalette(c("#9F025E", "#F9C929"))(length(unique(normalized_lat)))
+site_colors <- colors[rank(normalized_lat)]
+
+
+#Plotting
+ordiplot(NMDS, type = 'n')
+orditorp(NMDS, display = "species", col = "black", air = 0.01)
+
+
+#Add a legend for color gradient
+species_scores <- scores(NMDS, display = "species")
+site_scores <- scores(NMDS, display = "sites")
+
+
+#Ensure species names are unique in the data
+species_data <- data.frame(
+  NMDS1 = species_scores[, 1],
+  NMDS2 = species_scores[, 2],
+  Species = make.unique(rownames(species_scores))
+)
+
+#Create a data frame for site scores with site names, latitude, and categories
+site_data <- data.frame(
+  NMDS1 = site_scores[, 1],
+  NMDS2 = site_scores[, 2],
+  Site = rownames(site_scores),
+  Latitude = diversity_data$Latitude,
+  Category = diversity_data$Category
+)
+
+site_data$Category <- ifelse(site_data$Site == "Portblair", "Island", "Mainland")
+
+#Define a color mapping for the categories
+color_mapping <- c("Island" = "turquoise", "Mainland" = "olivedrab")
+
+
+p_nmds <- ggplot() +
+  geom_point(data = site_data, aes(x = NMDS1, y = NMDS2, fill = Category), shape = 21, size = 6) +
+  geom_point(data = species_data, aes(x = NMDS1, y = NMDS2), color = "black", size = 6, alpha = 0.1) +
+  geom_text(data = site_data, aes(x = NMDS1, y = NMDS2, label = Site, color = Latitude), size = 6,  nudge_y = 0.2) +
+  scale_fill_manual(values = color_mapping, name = "Category") +
+  scale_color_gradient(low = "#9F025E", high = "#F9C929", name = "Latitude") +
+  labs(
+       x = "NMDS1",
+       y = "NMDS2") +
+  theme_classic() +
+  theme(
+    axis.title.x = element_text(size = 16),
+    axis.title.y = element_text(size = 16),
+    axis.text.x = element_text(size = 16),
+    axis.text.y = element_text(size = 16),
+    legend.title = element_text(size = 16),
+    legend.text = element_text(size = 16),
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank()   
+  ) +
+  guides(fill = guide_legend(override.aes = list(shape = 21)))
+
+#ggsave(filename = "nmds.png", plot = p_nmds, width = 11, height = 6, dpi = 300)
+
+#Combine all community plots
+comm_plot <- (divplot / p_nmds)  + plot_annotation(tag_levels = 'a') &
+  theme(plot.tag = element_text(size = 25))    # Using | ensures side-by-side layout
+
+ggsave(filename = "figure3.png", plot = comm_plot, width = 12, height = 14, dpi = 300)
+
+#Calculate PERMANOVA scores
+bray_curtis <- vegdist(spnmds, method = "bray")
+
+permanova_result <- adonis2(bray_curtis ~ sp_arranged$Lat, data = sp_arranged, permutations = 999)
+print(permanova_result)
+#Significant 
+
+#Let's calculate PERMANOVA scores without Ramnagar
+
+sp_arranged1 <- sp_arranged %>%
+  dplyr::filter(Site != "Ramnagar")
+
+bray_curtis_matrix <- as.matrix(bray_curtis)
+
+bray_curtis1<- bray_curtis_matrix[rownames(bray_curtis_matrix) != "Ramnagar", 
+                                                     colnames(bray_curtis_matrix) != "Ramnagar"]
+
+# Step 3: Convert the matrix back to a dist object
+bray_curtis1 <- as.dist(bray_curtis1)
+
+permanova_result1 <- adonis2(bray_curtis1 ~ sp_arranged1$Lat, data = sp_arranged1, permutations = 999)
+print(permanova_result1)
+
+#Let's calculate PERMANOVA scores without Port Blair
+
+sp_arranged2 <- sp_arranged %>%
+  dplyr::filter(Site != "Portblair")
+
+bray_curtis_matrix <- as.matrix(bray_curtis)
+
+bray_curtis2<- bray_curtis_matrix[rownames(bray_curtis_matrix) != "Portblair", 
+                                                     colnames(bray_curtis_matrix) != "Portblair"]
+
+#Step 3: Convert the matrix back to a dist object
+bray_curtis2 <- as.dist(bray_curtis2)
+
+permanova_result2 <- adonis2(bray_curtis2 ~ sp_arranged2$Lat, data = sp_arranged2, permutations = 999)
+print(permanova_result2)
+
+```
+##Structural equation modelling
+
+We implemented a structural equation model using the lavaan package to 
+further understand relationships between variables.
+
+```{r structural equation modelling}
+
+#Subsetting dataset to contain relevant variables
+
+semdata <- data[, c("Plant.ID", "Latitude", "width", "EFNLB", "EFNS", "pherb", "average_abundance", "fruitno", "Area_Leafbase", "Area_Petiole", "Vol_Leafbase", "Vol_Petiole")]
+
+semdata_standardized <- as.data.frame(scale(semdata[, -1]))  #Scaling all except Plant.ID
+semdata_standardized$Plant.ID <- semdata$Plant.ID  #Add back the Plant.ID
+
+# Inspect the standardized data
+summary(semdata_standardized)
+
+#model specification
+model12 <- '
+  average_abundance ~ Latitude + EFNLB + EFNS
+  pherb ~ Latitude + average_abundance + EFNLB + EFNS
+  EFNLB ~ Latitude + width + pherb 
+  EFNS ~ Latitude + width + pherb
+  fruitno ~ pherb + average_abundance + Latitude + EFNLB + EFNS +  width 
+ '
+
+rev_fit <- sem(model12, data = semdata_standardized, std.lv = TRUE)
+
+#Evaluate the model
+revfit_summary <- summary(rev_fit, fit.measures = TRUE, standardized = TRUE, rsquare = TRUE)
+
+
+#pherb and Area_Leafbase have -ve R2 values
+#Suggests they are misspecified, the variables/models don't sufficiently 
+#explain variation in these variables
+
+#25 November 2024 - trying another model without EFN predicted by herbivory
+#To remove circularity
+
+model121 <- '
+  average_abundance ~ Latitude + EFNLB + EFNS
+  pherb ~ Latitude + average_abundance + EFNLB + EFNS
+  EFNLB ~ Latitude + width  
+  EFNS ~ Latitude + width 
+  fruitno ~ pherb + average_abundance + Latitude + EFNLB + EFNS +  width 
+ '
+rev_fit1 <- sem(model121, data = semdata_standardized, std.lv = TRUE)
+
+#Evaluate the model
+revfit_summary1 <- summary(rev_fit1, fit.measures = TRUE, standardized = TRUE, rsquare = TRUE)
+
+#Negative R-squared goes away when circular dependencies are removed
+#Much poorer fit than model12
+
+#Checking for collinearity between variables
+
+#Subset predictors of an endogenous variable
+predictors <- semdata_standardized[, c("Latitude", "width", "EFNLB", "EFNS", "pherb", "average_abundance", "fruitno")]
+
+#Compute correlation matrix
+cor_matrix <- cor(predictors, use = "complete.obs")
+
+#Visualize
+corrplot(cor_matrix, method = "circle")
+
+#Nothing concerning
+
+#Inspect VIF values
+
+vif_ab <- lm(average_abundance ~ Latitude + EFNLB + EFNS, data = semdata_standardized)
+vif_herb <- lm(pherb ~  Latitude + average_abundance + EFNLB + EFNS, data = semdata_standardized)
+vif_lb <- lm( EFNLB ~ Latitude + width, data = semdata_standardized)
+vif_s <- lm(EFNS ~ Latitude + width, data = semdata_standardized )
+vif_fru <- lm(fruitno ~ pherb + average_abundance + Latitude + EFNLB + EFNS +  width, data = semdata_standardized)
+
+#Compute VIF
+vif(vif_ab)
+vif(vif_herb)
+vif(vif_lb)
+vif(vif_s)
+vif(vif_fru)
+
+#collinearity not an issue
+
+#Adding correlated errors
+
+model122 <- '
+  average_abundance ~ Latitude + EFNLB + EFNS
+  pherb ~ Latitude + average_abundance + EFNLB + EFNS
+  EFNLB ~ Latitude + width  
+  EFNS ~ Latitude + width 
+  fruitno ~ pherb + average_abundance + Latitude + EFNLB + EFNS +  width 
+  EFNS ~~ EFNLB
+ '
+rev_fit2 <- sem(model122, data = semdata_standardized, std.lv = TRUE)
+
+#Evaluate the model
+revfit_summary2 <- summary(rev_fit2, fit.measures = TRUE, standardized = TRUE, rsquare = TRUE)
+
+#This model meets specifications and has positive R-squared values
+
+#Simplified model in which directly non-explainable links for fruit number are removed
+
+model123 <- '
+  average_abundance ~ Latitude + EFNLB + EFNS
+  pherb ~ Latitude + average_abundance + EFNLB + EFNS
+  EFNLB ~ Latitude + width  
+  EFNS ~ Latitude + width 
+  fruitno ~ pherb + average_abundance + Latitude + width 
+  EFNS ~~ EFNLB
+ '
+rev_fit3 <- sem(model123, data = semdata_standardized, std.lv = TRUE)
+
+#Evaluate the model
+revfit_summary3 <- summary(rev_fit3, fit.measures = TRUE, standardized = TRUE, rsquare = TRUE)
+
+#Good fit, best model so far but goodness of fit indices lower than model122
+
+#Same model as above, but with indirect effects of EFN on fruits
+
+model124 <- '
+  # Direct effects
+  average_abundance ~ c1*Latitude + c9*EFNLB + c2*EFNS
+  pherb ~ c3*Latitude + c4*average_abundance + c10*EFNLB + c5*EFNS
+  fruitno ~ c6*pherb + c7*average_abundance + c8*Latitude + width
+  EFNLB ~ Latitude + width
+  EFNS ~ Latitude + width
+  EFNS ~~ EFNLB
+  
+  # Indirect effects of EFNs on fruit number
+  ind_efnlb := c9 * c4 * c6  # EFNLB → average_abundance → pherb → fruitno
+  ind_efns := c2 * c4 * c6   # EFNS → average_abundance → pherb → fruitno
+'
+
+rev_fit4 <- sem(model124, data = semdata_standardized, std.lv = TRUE)
+
+#Evaluate the model
+revfit_summary4 <- summary(rev_fit4, fit.measures = TRUE, standardized = TRUE, rsquare = TRUE)
+
+#model124 has good fit but no evidence of indirect effects
+
+#Use direct AND indirect effects - what if there is some genetics?
+
+model125 <- '
+  # Direct effects
+  average_abundance ~ c1*Latitude + c9*EFNLB + c2*EFNS
+  pherb ~ c3*Latitude + c4*average_abundance + c10*EFNLB + c5*EFNS
+  fruitno ~ c6*pherb + c7*average_abundance + c8*Latitude + EFNLB + EFNS + width
+  EFNLB ~ Latitude + width
+  EFNS ~ Latitude + width
+  EFNS ~~ EFNLB
+  
+  # Indirect effects of EFNs on fruit number
+  ind_efnlb := c9 * c4 * c6  # EFNLB → average_abundance → pherb → fruitno
+  ind_efns := c2 * c4 * c6   # EFNS → average_abundance → pherb → fruitno
+'
+
+rev_fit5 <- sem(model125, data = semdata_standardized, std.lv = TRUE)
+
+#Evaluate the model
+revfit_summary5 <- summary(rev_fit5, fit.measures = TRUE, standardized = TRUE, rsquare = TRUE)
+
+#Best model
+
+#Final model
+
+###Make Figure 4
+sem_apriori <- ggdraw() + draw_image("Slide2.PNG")
+sem_sig <- ggdraw() + draw_image("Slide3.PNG")
+
+sem_plot <- (sem_apriori / sem_sig)  + plot_annotation(tag_levels = 'a') &
+  theme(plot.tag = element_text(size = 25))  
+
+ggsave(filename = "figure4.png", plot = sem_plot, width = 12, height = 12, dpi = 300)
+
+```
