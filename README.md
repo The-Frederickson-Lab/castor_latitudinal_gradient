@@ -1,51 +1,165 @@
----
-title: "Castor_latitudinal_gradient"
-author: "Pooja Nathan"
-date: "`r Sys.Date()`"
-output: github_document
----
+Castor_latitudinal_gradient
+================
+Pooja Nathan
+2025-01-06
 
-##Latitudinal gradients in species interactions
+\##Latitudinal gradients in species interactions
 
-In this study, we sampled populations of the castor plant, Ricinus communis, across a large latitudinal range in the Indian subcontinent to understand if, when the host species is kept constant, there is variation in mutualistic traits and interactions across latitude as posited by the biotic interactions hypothesis.
+In this study, we sampled populations of the castor plant, Ricinus
+communis, across a large latitudinal range in the Indian subcontinent to
+understand if, when the host species is kept constant, there is
+variation in mutualistic traits and interactions across latitude as
+posited by the biotic interactions hypothesis.
 
-```{r importing packages, echo = FALSE}
-library(dplyr)
-library(tidyr)
-library(knitr)
-library(ggplot2)
-library(ggspatial)
-library(ggpubr)
-library(cowplot)
-library(gridExtra)
-library(patchwork)
-library(grid)
-library(lavaan)
-library(piecewiseSEM)
-library(ggforce)
-library(lme4)
-library(car)
-library(raster)
-library(scales)
-library(sf)
-library(magick)
-library(vegan)
-library(ggrepel)
-library(terra)
-library(sp)
-library(corrplot)
-library(viridis)
-```
-Let's make a plot of all sites sampled on a map of India
+    ## 
+    ## Attaching package: 'dplyr'
 
-```{r plotting all sites on a map}
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
 
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+    ## Warning: package 'ggspatial' was built under R version 4.4.2
+
+    ## 
+    ## Attaching package: 'cowplot'
+
+    ## The following object is masked from 'package:ggpubr':
+    ## 
+    ##     get_legend
+
+    ## 
+    ## Attaching package: 'gridExtra'
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     combine
+
+    ## 
+    ## Attaching package: 'patchwork'
+
+    ## The following object is masked from 'package:cowplot':
+    ## 
+    ##     align_plots
+
+    ## This is lavaan 0.6-18
+    ## lavaan is FREE software! Please report any bugs.
+
+    ## Registered S3 method overwritten by 'MuMIn':
+    ##   method        from 
+    ##   nobs.multinom broom
+
+    ## 
+    ##   This is piecewiseSEM version 2.3.0.
+    ## 
+    ## 
+    ##   Questions or bugs can be addressed to <LefcheckJ@si.edu>.
+
+    ## Loading required package: Matrix
+
+    ## 
+    ## Attaching package: 'Matrix'
+
+    ## The following objects are masked from 'package:tidyr':
+    ## 
+    ##     expand, pack, unpack
+
+    ## Loading required package: carData
+
+    ## 
+    ## Attaching package: 'car'
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     recode
+
+    ## Loading required package: sp
+
+    ## 
+    ## Attaching package: 'raster'
+
+    ## The following object is masked from 'package:lme4':
+    ## 
+    ##     getData
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     select
+
+    ## Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.3.1; sf_use_s2() is TRUE
+
+    ## Linking to ImageMagick 6.9.12.98
+    ## Enabled features: cairo, freetype, fftw, ghostscript, heic, lcms, pango, raw, rsvg, webp
+    ## Disabled features: fontconfig, x11
+
+    ## Loading required package: permute
+
+    ## Loading required package: lattice
+
+    ## This is vegan 2.6-8
+
+    ## terra 1.7.78
+
+    ## 
+    ## Attaching package: 'terra'
+
+    ## The following object is masked from 'package:scales':
+    ## 
+    ##     rescale
+
+    ## The following object is masked from 'package:grid':
+    ## 
+    ##     depth
+
+    ## The following object is masked from 'package:patchwork':
+    ## 
+    ##     area
+
+    ## The following object is masked from 'package:ggpubr':
+    ## 
+    ##     rotate
+
+    ## The following object is masked from 'package:knitr':
+    ## 
+    ##     spin
+
+    ## The following object is masked from 'package:tidyr':
+    ## 
+    ##     extract
+
+    ## corrplot 0.94 loaded
+
+    ## Loading required package: viridisLite
+
+    ## 
+    ## Attaching package: 'viridis'
+
+    ## The following object is masked from 'package:scales':
+    ## 
+    ##     viridis_pal
+
+Let’s make a plot of all sites sampled on a map of India
+
+``` r
 #Read shapefile
 #shapefile_path <- "gadm41_IND_shp/gadm41_IND_0.shp"
 shapefile_path <- "India_Country_Boundary.shp"
 india <- st_read(shapefile_path)
+```
 
+    ## Reading layer `India_Country_Boundary' from data source 
+    ##   `D:\PoojaCN\University of Toronto\Academics\Chapter 2 - Mutualism Latitudinal gradient\Data\castor_latitudinal_gradient\India_Country_Boundary.shp' 
+    ##   using driver `ESRI Shapefile'
+    ## Simple feature collection with 253 features and 1 field
+    ## Geometry type: MULTIPOLYGON
+    ## Dimension:     XY
+    ## Bounding box:  xmin: 7583508 ymin: 753607.8 xmax: 10843390 ymax: 4451428
+    ## Projected CRS: WGS 84 / Pseudo-Mercator
 
+``` r
 #Set latitude and longitude of sites
 Site <- c("Ramnagar", "Aligarh", "Gwalior", "Bhopal","Nagpur", "Hyderabad", 
           "Hampi", "Bangalore","Port Blair", "Srirangam", "Kanyakumari" )
@@ -80,12 +194,11 @@ indmap <- ggplot(data = india) +
                          style = north_arrow_fancy_orienteering())
 ```
 
-##Data cleaning
+\##Data cleaning
 
-Now, let's import and clean all the trait and interaction data
+Now, let’s import and clean all the trait and interaction data
 
-```{r reading in and cleaning up data}
-
+``` r
 #Reading in plant traits dataset
 morph <- read.csv("morph_natint_20May24.csv")
 names(morph)[names(morph) == "Site"] <- "Location"
@@ -94,6 +207,11 @@ names(morph)[names(morph) == "Number.of.fruits"] <- "fruitno"
 names(morph)[names(morph) == "Number.of.branches"] <- "branchno"
 names(morph)[names(morph) == "Plant ID"] <- "Plant.ID"
 morph$Latitude <- as.numeric(morph$Latitude)
+```
+
+    ## Warning: NAs introduced by coercion
+
+``` r
 morph$Phenology <- as.factor(morph$Phenology)
 morph$width <- as.numeric(morph$width)
 morph$branchno <- as.numeric(morph$branchno)
@@ -114,7 +232,12 @@ efnarea <- efnarea %>%
     Area = mean(Area, na.rm = TRUE),
     Location = first(Location)
   )
+```
 
+    ## `summarise()` has grouped output by 'Plant.ID'. You can override using the
+    ## `.groups` argument.
+
+``` r
 #converting to wideform
 
 efnarea <- efnarea %>%
@@ -134,7 +257,12 @@ volume <- volume %>%
   group_by(Plant.ID, Type) %>% 
   summarise(meanvol = mean(dropvol, na.rm = TRUE),
     Location = first(Location)) 
+```
 
+    ## `summarise()` has grouped output by 'Plant.ID'. You can override using the
+    ## `.groups` argument.
+
+``` r
 #converting to wideform
 volume <- volume %>%
   pivot_wider(names_from = Type, values_from = meanvol, 
@@ -164,19 +292,22 @@ all_comb <- left_join(all_comb, volume, by = "Plant.ID")
 #removing unneeded columns
 data <- all_comb[, c(1:4, 6:27, 30:35, 37, 40, 41, 43, 44)]                         
 names(data)[names(data) == "Location.x"] <- "Location"                      
-
 ```
 
 ## Plots and statistical models
 
-#Correlations among variables
+\#Correlations among variables
 
-```{r correlations and data summary}
-
+``` r
 png("efn_correlations.png")
 corrplot::corrplot(cor(data[, c("EFNLB", "EFNS", "EFNL", "Area_Leafbase", "Area_Petiole", "Vol_Leafbase", "Vol_Petiole")], use="pairwise.complete.obs"))
 dev.off()
+```
 
+    ## png 
+    ##   2
+
+``` r
 #EFN volumes are correlated to EFN areas
 #Calculate R^2 and p-value for Area_Leafbase vs Vol_Leafbase
 model1 <- lm(log10(Vol_Leafbase) ~ log10(Area_Leafbase), data = data)
@@ -209,7 +340,25 @@ area_volume_cor2 <- ggplot(data=data, aes(x=Area_Petiole, y=Vol_Petiole)) +
   annotate("text", x=2, y=2, label=paste("R^2 =", round(r_squared2, 3), "\nP =", signif(p_value2, 3)), hjust=0)
 
 area_volume <- plot_grid(area_volume_cor1, area_volume_cor2, labels=c("A) Leaf base EFNs", "B) Petiole EFNs"))
+```
 
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+    ## Warning: Removed 156 rows containing non-finite outside the scale range
+    ## (`stat_smooth()`).
+
+    ## Warning: Removed 156 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+    ## Warning: Removed 157 rows containing non-finite outside the scale range
+    ## (`stat_smooth()`).
+
+    ## Warning: Removed 157 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+``` r
 ggsave(filename = "efn_area_volume_correlation.png", plot = area_volume, width = 12, height = 7, dpi = 300)
 
 #Number of plants at each site
@@ -218,84 +367,315 @@ data$Location <- as.factor(data$Location)
 plantnos <- data %>%
   group_by(Location) %>%
   summarise(Number_of_Plants = n_distinct(Plant.ID))
-
 ```
 
-##Statistical modelling 
+\##Statistical modelling
 
-We will now use linear models and multivariate linear models where appropriate 
+We will now use linear models and multivariate linear models where
+appropriate
 
-```{r linear models, echo = FALSE}
+    ## Response EFNLB :
+    ## 
+    ## Call:
+    ## lm(formula = EFNLB ~ Latitude + width + Type, data = data)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -1.03998 -0.51021  0.01978  0.39736  1.50166 
+    ## 
+    ## Coefficients:
+    ##               Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)   1.929037   0.263410   7.323 1.29e-11 ***
+    ## Latitude     -0.012125   0.006012  -2.017   0.0455 *  
+    ## width        -0.019191   0.011211  -1.712   0.0890 .  
+    ## TypeMainland  0.071918   0.242697   0.296   0.7674    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.5218 on 153 degrees of freedom
+    ##   (7 observations deleted due to missingness)
+    ## Multiple R-squared:  0.03867,    Adjusted R-squared:  0.01982 
+    ## F-statistic: 2.052 on 3 and 153 DF,  p-value: 0.109
+    ## 
+    ## 
+    ## Response EFNS :
+    ## 
+    ## Call:
+    ## lm(formula = EFNS ~ Latitude + width + Type, data = data)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -2.6647 -1.2172 -0.1322  0.8726  5.0147 
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)   2.95035    0.81146   3.636 0.000378 ***
+    ## Latitude      0.02717    0.01852   1.467 0.144449    
+    ## width        -0.06075    0.03454  -1.759 0.080557 .  
+    ## TypeMainland -0.60338    0.74765  -0.807 0.420896    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.608 on 153 degrees of freedom
+    ##   (7 observations deleted due to missingness)
+    ## Multiple R-squared:  0.04129,    Adjusted R-squared:  0.0225 
+    ## F-statistic: 2.197 on 3 and 153 DF,  p-value: 0.09073
 
-#Classifying as native, mainland and island sites
-data$Type <- ifelse(data$Location %in% c("Rumuruti1", "Rumuruti2"), "Native", 
-                   ifelse(data$Location == "Portblair", "Island", "Mainland"))
+    ## 
+    ## Type II MANOVA Tests: Pillai test statistic
+    ##          Df test stat approx F num Df den Df   Pr(>F)   
+    ## Latitude  1  0.082698   6.8517      2    152 0.001416 **
+    ## width     1  0.024678   1.9230      2    152 0.149714   
+    ## Type      1  0.009438   0.7241      2    152 0.486428   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-#removing Kenya datapoints
-data <- data[!data$Location %in% c("Rumuruti1", "Rumuruti2"), ]
+    ## Response Area_Leafbase :
+    ## 
+    ## Call:
+    ## lm(formula = Area_Leafbase ~ Latitude + width + Type, data = data)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.8743 -0.9918  0.2593  0.8616  4.0138 
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error t value Pr(>|t|)   
+    ## (Intercept)   5.05809    1.89242   2.673  0.01112 * 
+    ## Latitude     -0.12980    0.03926  -3.306  0.00211 **
+    ## width         0.04621    0.06898   0.670  0.50711   
+    ## TypeMainland  1.67779    1.81944   0.922  0.36243   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.777 on 37 degrees of freedom
+    ##   (123 observations deleted due to missingness)
+    ## Multiple R-squared:  0.239,  Adjusted R-squared:  0.1773 
+    ## F-statistic: 3.873 on 3 and 37 DF,  p-value: 0.01665
+    ## 
+    ## 
+    ## Response Area_Petiole :
+    ## 
+    ## Call:
+    ## lm(formula = Area_Petiole ~ Latitude + width + Type, data = data)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -2.3923 -0.8582 -0.0857  0.5904  3.7341 
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error t value Pr(>|t|)   
+    ## (Intercept)   4.83484    1.39476   3.466  0.00135 **
+    ## Latitude     -0.09848    0.02894  -3.403  0.00161 **
+    ## width         0.02034    0.05084   0.400  0.69133   
+    ## TypeMainland  0.02490    1.34097   0.019  0.98529   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.31 on 37 degrees of freedom
+    ##   (123 observations deleted due to missingness)
+    ## Multiple R-squared:  0.2389, Adjusted R-squared:  0.1772 
+    ## F-statistic: 3.871 on 3 and 37 DF,  p-value: 0.01669
 
-#Multivariate linear models
+    ## 
+    ## Type II MANOVA Tests: Pillai test statistic
+    ##          Df test stat approx F num Df den Df   Pr(>F)   
+    ## Latitude  1  0.262340   6.4015      2     36 0.004182 **
+    ## width     1  0.012300   0.2242      2     36 0.800299   
+    ## Type      1  0.043378   0.8162      2     36 0.450115   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-#Stem width at 10 cm used as a proxy for plant age
+    ## 
+    ## Call:
+    ## lm(formula = Vol_Leafbase ~ Area_Leafbase, data = data)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -1.2198 -0.3190 -0.1468  0.4092  1.5613 
+    ## 
+    ## Coefficients:
+    ##               Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)   -0.09201    0.32330  -0.285 0.778487    
+    ## Area_Leafbase  0.28008    0.06598   4.245 0.000306 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.6604 on 23 degrees of freedom
+    ##   (139 observations deleted due to missingness)
+    ## Multiple R-squared:  0.4393, Adjusted R-squared:  0.4149 
+    ## F-statistic: 18.02 on 1 and 23 DF,  p-value: 0.0003058
 
-#EFN number 
-mlm1 <- lm(cbind(EFNLB, EFNS) ~ Latitude + width + Type, data = data)
-#For individual coefficients for each variable
-summary(mlm1)
-#For overall differences - MANOVA
-Anova(mlm1)
+    ## 
+    ## Call:
+    ## lm(formula = Vol_Petiole ~ Area_Petiole, data = data)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -0.6383 -0.2824 -0.1430  0.4352  0.7321 
+    ## 
+    ## Coefficients:
+    ##               Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  -0.009992   0.266461  -0.037 0.970426    
+    ## Area_Petiole  0.288871   0.074575   3.874 0.000821 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.4251 on 22 degrees of freedom
+    ##   (140 observations deleted due to missingness)
+    ## Multiple R-squared:  0.4055, Adjusted R-squared:  0.3785 
+    ## F-statistic:    15 on 1 and 22 DF,  p-value: 0.0008205
 
-#EFN areas
-mlm2 <- lm(cbind(Area_Leafbase, Area_Petiole) ~ Latitude + width + Type, data = data)
-summary(mlm2)
-Anova(mlm2)
+    ## 
+    ## Call:
+    ## lm(formula = pherb ~ Latitude + width + average_abundance + Type, 
+    ##     data = data)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -0.61561 -0.15879  0.02668  0.18434  0.41062 
+    ## 
+    ## Coefficients:
+    ##                    Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)        0.260988   0.119894   2.177 0.031037 *  
+    ## Latitude           0.008994   0.002862   3.143 0.002010 ** 
+    ## width             -0.006493   0.005021  -1.293 0.197930    
+    ## average_abundance -0.003603   0.002345  -1.536 0.126563    
+    ## TypeMainland       0.368920   0.109140   3.380 0.000921 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.2331 on 152 degrees of freedom
+    ##   (7 observations deleted due to missingness)
+    ## Multiple R-squared:  0.1943, Adjusted R-squared:  0.1731 
+    ## F-statistic: 9.166 on 4 and 152 DF,  p-value: 1.164e-06
 
+    ## 
+    ## Call:
+    ## lm(formula = average_abundance ~ Latitude + width + Type, data = data)
+    ## 
+    ## Residuals:
+    ##    Min     1Q Median     3Q    Max 
+    ## -9.828 -4.025 -2.128  1.232 51.574 
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)   9.81496    4.05615   2.420   0.0167 *  
+    ## Latitude     -0.42130    0.09258  -4.551 1.08e-05 ***
+    ## width        -0.15280    0.17264  -0.885   0.3775    
+    ## TypeMainland  5.36891    3.73719   1.437   0.1529    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 8.035 on 153 degrees of freedom
+    ##   (7 observations deleted due to missingness)
+    ## Multiple R-squared:  0.1208, Adjusted R-squared:  0.1036 
+    ## F-statistic: 7.009 on 3 and 153 DF,  p-value: 0.0001898
 
-lm6 <- lm(Vol_Leafbase ~ Area_Leafbase, data = data) 
-summary(lm6)
+    ## Response seedweight :
+    ## 
+    ## Call:
+    ## lm(formula = seedweight ~ Latitude + width, data = data)
+    ## 
+    ## Residuals:
+    ##       Min        1Q    Median        3Q       Max 
+    ## -0.051548 -0.029625 -0.000222  0.009889  0.198798 
+    ## 
+    ## Coefficients:
+    ##               Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  0.1404646  0.0209103   6.717 2.42e-08 ***
+    ## Latitude    -0.0009393  0.0008607  -1.091    0.281    
+    ## width        0.0018359  0.0013171   1.394    0.170    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.04081 on 46 degrees of freedom
+    ##   (115 observations deleted due to missingness)
+    ## Multiple R-squared:  0.0696, Adjusted R-squared:  0.02915 
+    ## F-statistic: 1.721 on 2 and 46 DF,  p-value: 0.1903
+    ## 
+    ## 
+    ## Response elaiosome.weight :
+    ## 
+    ## Call:
+    ## lm(formula = elaiosome.weight ~ Latitude + width, data = data)
+    ## 
+    ## Residuals:
+    ##       Min        1Q    Median        3Q       Max 
+    ## -0.010144 -0.005369 -0.002233  0.001132  0.039879 
+    ## 
+    ## Coefficients:
+    ##               Estimate Std. Error t value Pr(>|t|)  
+    ## (Intercept)  1.065e-02  5.130e-03   2.075   0.0436 *
+    ## Latitude    -3.329e-06  2.112e-04  -0.016   0.9875  
+    ## width       -5.300e-05  3.232e-04  -0.164   0.8704  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.01001 on 46 degrees of freedom
+    ##   (115 observations deleted due to missingness)
+    ## Multiple R-squared:  0.0005844,  Adjusted R-squared:  -0.04287 
+    ## F-statistic: 0.01345 on 2 and 46 DF,  p-value: 0.9866
 
-lm7 <- lm(Vol_Petiole ~ Area_Petiole, data = data)
-summary(lm7)
+    ## 
+    ## Type II MANOVA Tests: Pillai test statistic
+    ##          Df test stat approx F num Df den Df Pr(>F)
+    ## Latitude  1  0.025889  0.59799      2     45 0.5542
+    ## width     1  0.043940  1.03409      2     45 0.3638
 
-#EFN areas and volumes are highly correlated
-#Because we had only a small number of volume measurements 
-#And because they are correlated, we used areas as a proxy for investment
+    ## 
+    ## Call:
+    ## lm(formula = ratio ~ Latitude + width, data = data)
+    ## 
+    ## Residuals:
+    ##       Min        1Q    Median        3Q       Max 
+    ## -0.069348 -0.035873 -0.021111  0.005259  0.282975 
+    ## 
+    ## Coefficients:
+    ##               Estimate Std. Error t value Pr(>|t|)  
+    ## (Intercept)  0.0759202  0.0364100   2.085   0.0426 *
+    ## Latitude     0.0003347  0.0014987   0.223   0.8242  
+    ## width       -0.0010309  0.0022934  -0.450   0.6552  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.07106 on 46 degrees of freedom
+    ##   (115 observations deleted due to missingness)
+    ## Multiple R-squared:  0.005891,   Adjusted R-squared:  -0.03733 
+    ## F-statistic: 0.1363 on 2 and 46 DF,  p-value: 0.8729
 
-#Herbivory
+    ## 
+    ## Call:
+    ## lm(formula = fruitno ~ Latitude + width + branchno + pherb + 
+    ##     Type, data = data)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -57.436 -20.313  -3.798  12.851 218.886 
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)   34.2044    18.1172   1.888 0.061017 .  
+    ## Latitude      -1.6655     0.4321  -3.854 0.000174 ***
+    ## width          3.2556     0.8317   3.914 0.000139 ***
+    ## branchno       2.4383     0.5698   4.279 3.38e-05 ***
+    ## pherb          0.2862    12.3003   0.023 0.981466    
+    ## TypeMainland -24.6424    17.0326  -1.447 0.150103    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 35.41 on 146 degrees of freedom
+    ##   (12 observations deleted due to missingness)
+    ## Multiple R-squared:  0.3584, Adjusted R-squared:  0.3364 
+    ## F-statistic: 16.31 on 5 and 146 DF,  p-value: 9.145e-13
 
-lm8 <- lm(pherb ~ Latitude + width + average_abundance + Type, 
-          data = data)
+\##Visualizing the data
 
-summary(lm8)
-
-#ant abundance
-
-lm9 <- lm(average_abundance ~ Latitude + width + Type, 
-          data = data)
-summary(lm9)
-
-#Seed mass, elaiosome mass
-
-mlm3 <- lm(cbind(seedweight, elaiosome.weight) ~ Latitude + width, data = data)
-summary(mlm3)
-Anova(mlm3)
-
-lm12 <- lm(ratio ~ Latitude + width, data = data)
-summary(lm12)
-
-#Fitness
-lm13 <- lm(fruitno ~ Latitude + width + branchno + pherb + Type, data = data)
-summary(lm13)
-
-```
-##Visualizing the data
-
-#Extrafloral nectaries 
+\#Extrafloral nectaries
 
 Data visualization for extrafloral nectary traits
 
-```{r EFNs}
-
+``` r
 base_size <- 10
 
 #Extracting coefficients and p-values from MLMs
@@ -323,7 +703,15 @@ p_efn_lb_1 <- ggplot(data = data, aes(x = Latitude, y = EFNLB, color = Type)) +
         plot.margin = margin(10, 10, 10, 10)) +
   geom_abline(intercept = intercept_efnlb, slope = slope_latitude_efnlb, color = "slategrey", size = 2) +
   annotate("text", x = 19, y = 1.8, label = "*", size = 12, color = "black")
+```
 
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+``` r
 p_inset <- ggplot(data = data, aes(x = Type, y = EFNLB, fill = Type)) +
   geom_boxplot(width = 0.5, position = position_dodge(width = 0.75)) +
   scale_fill_manual(values = c("Island" = "turquoise", "Mainland" = "olivedrab")) +
@@ -341,7 +729,12 @@ p_inset <- ggplot(data = data, aes(x = Type, y = EFNLB, fill = Type)) +
 combined_plot_efnlb <- ggdraw() +
   draw_plot(p_efn_lb_1) +
   draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
+```
 
+    ## Warning: Removed 1 row containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+``` r
 #ggsave(filename = "efnlb.png", plot = combined_plot_efnlb, width = 10, height = 7, dpi = 300)
 
 #Stem EFNs - non-significant
@@ -381,7 +774,12 @@ p_inset <- ggplot(data = data, aes(x = Type, y = EFNS, fill = Type)) +
 combined_plot_efns <- ggdraw() +
   draw_plot(p_efn_s_1) +
   draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
+```
 
+    ## Warning: Removed 1 row containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+``` r
 #ggsave(filename = "efns.png", plot = combined_plot_efns, width = 10, height = 7, dpi = 300)
 
 
@@ -432,7 +830,15 @@ p_inset <- ggplot(data = data, aes(x = Type, y = Area_Leafbase, fill = Type)) +
 combined_plot_arealb <- ggdraw() +
   draw_plot(p_area_lb) +
   draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
+```
 
+    ## Warning: Removed 103 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+    ## Warning: Removed 102 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+``` r
 #ggsave(filename = "arealb.png", plot = combined_plot_arealb, width = 10, height = 7, dpi = 300)
 
 #Petiole EFNs
@@ -478,7 +884,15 @@ p_inset <- ggplot(data = data, aes(x = Type, y = Area_Petiole, fill = Type)) +
 combined_plot_areas <- ggdraw() +
   draw_plot(p_area_s) +
   draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
+```
 
+    ## Warning: Removed 112 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+    ## Warning: Removed 111 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+``` r
 #ggsave(filename = "areas.png", plot = combined_plot_areas, width = 10, height = 7, dpi = 300)
 
 #EFN volumes
@@ -519,7 +933,20 @@ p_inset <- ggplot(data = data, aes(x = Type, y = Vol_Leafbase, fill = Type)) +
 combined_plot_vollb <- ggdraw() +
   draw_plot(p_volume_lb) +
   draw_plot(p_inset, x = 0.75, y = 0.7, width = 0.25, height = 0.25)
+```
 
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+    ## Warning: Removed 140 rows containing non-finite outside the scale range
+    ## (`stat_smooth()`).
+
+    ## Warning: Removed 140 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+    ## Warning: Removed 139 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+``` r
 #ggsave(filename = "vollb.png", plot = combined_plot_vollb, width = 10, height = 7, dpi = 300)
 
 #Petiolar EFNs
@@ -558,13 +985,24 @@ p_inset <- ggplot(data = data, aes(x = Type, y = Vol_Petiole, fill = Type)) +
 combined_plot_vols <- ggdraw() +
   draw_plot(p_volume_s) +
   draw_plot(p_inset, x = 0.75, y = 0.7, width = 0.25, height = 0.25)
+```
 
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+    ## Warning: Removed 140 rows containing non-finite outside the scale range
+    ## (`stat_smooth()`).
+
+    ## Warning: Removed 140 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+    ## Warning: Removed 139 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+``` r
 #ggsave(filename = "volumes.png", plot = combined_plot_vols, width = 10, height = 7, dpi = 300)
 ```
 
-
-```{r Herbivory and ant visits}
-
+``` r
 #Herbivory
 
 intercept_herb <- coef(lm8)["(Intercept)"]
@@ -606,7 +1044,12 @@ p_inset <- ggplot(data = data, aes(x = Type, y = pherb, fill = Type)) +
 combined_plot_herb <- ggdraw() +
   draw_plot(p_herb1) +
   draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
+```
 
+    ## Warning: Removed 1 row containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+``` r
 #ggsave(filename = "herb.png", plot = combined_plot_herb, width = 12, height = 7, dpi = 300)
 
 
@@ -651,15 +1094,16 @@ p_inset <- ggplot(data = data, aes(x = Type, y = average_abundance, fill = Type)
 combined_plot_ants <- ggdraw() +
   draw_plot(p_ants1) +
   draw_plot(p_inset, x = 0.65, y = 0.65, width = 0.35, height = 0.35)
-
-
-#ggsave(filename = "combined_plot_ants.png", plot = combined_plot_ants, width = 12, height = 7, dpi = 300)
-
 ```
 
-```{r Making Fig. 1 and 2}
+    ## Warning: Removed 1 row containing missing values or values outside the scale range
+    ## (`geom_point()`).
 
+``` r
+#ggsave(filename = "combined_plot_ants.png", plot = combined_plot_ants, width = 12, height = 7, dpi = 300)
+```
 
+``` r
 #Figure 1
 
 #Create a legend
@@ -671,8 +1115,12 @@ legend_plot <- ggplot(data = data.frame(Type = c("Island", "Mainland"), x = 1:2,
   guides(color = guide_legend(override.aes = list(shape = 16)))  
 
 common_legend <- get_legend(legend_plot)
+```
 
+    ## Warning in get_plot_component(plot, "guide-box"): Multiple components found;
+    ## returning the first one. To return all, use `return_all = TRUE`.
 
+``` r
 #Add it to the map
 indmap <- plot_grid(indmap, common_legend, nrow = 2, rel_heights = c(1, 0.2))
 
@@ -703,15 +1151,18 @@ final_plot <- combined_plot +
 
 # Display the final plot
 print(final_plot)
-
-# Save the final plot to a file
-ggsave("figure2.png", final_plot, width = 11.5, height = 12)
-
 ```
 
-#How does seed size and elaiosome/seed mass vary across latitude?
+![](README_files/figure-gfm/Making%20Fig.%201%20and%202-1.png)<!-- -->
 
-```{r seeds}
+``` r
+# Save the final plot to a file
+ggsave("figure2.png", final_plot, width = 11.5, height = 12)
+```
+
+\#How does seed size and elaiosome/seed mass vary across latitude?
+
+``` r
 #How does seed size and elaiosome weight vary across latitude?
 
 #Seeds were placed on scale and total weight was divided by number of seeds
@@ -732,13 +1183,11 @@ p_seedrat <- ggplot(data = data, aes(x = Latitude, y = ratio)) +
   xlab("Latitude") +
   ylab("Elaiosome weight to seed weight ratio") +
   ggtitle("Variation in e/s ratio across latitude") 
-  
-
 ```
 
-##Visualizing plant traits
+\##Visualizing plant traits
 
-```{r Plant traits}
+``` r
 #How do plant traits vary across latitude?
 
 
@@ -794,20 +1243,26 @@ p_fit <- ggplot(data = data, aes(x = Latitude, y = fruitno)) +
   geom_smooth(method = "lm", se = TRUE, color = "slateblue") +
   xlab("Latitude") +
   ylab("Number of fruits") 
-
-
 ```
-##Ant community analysis
 
+\##Ant community analysis
 
-Here, we will generate some plots to understand how scan number and and number of days scanned affect ant abundance data trends. Inferences from these plots will be used to control for sampling effort in the main data analysis of this study.
+Here, we will generate some plots to understand how scan number and and
+number of days scanned affect ant abundance data trends. Inferences from
+these plots will be used to control for sampling effort in the main data
+analysis of this study.
 
-```{r Exploratory plots}
+``` r
 ants <- read.csv("Ant_abundance_all_natint_20May24.csv") #read in the abundance dataset
 ants$Site <- as.factor(ants$Site) 
 
 #Making sure formats are correct
 ants$number1 <- as.numeric(as.character(ants$number1))
+```
+
+    ## Warning: NAs introduced by coercion
+
+``` r
 ants$number2 <- as.numeric(as.character(ants$number2))
 ants$number3 <- as.numeric(as.character(ants$number3))
 ants$number4 <- as.numeric(as.character(ants$number4))
@@ -919,7 +1374,15 @@ scans_days_plot <- scans_days_plot +
   plot_annotation(tag_levels = 'A')
 
 ggsave("figureS2.png", scans_days_plot, width = 7, height = 10)
+```
 
+    ## Warning in max(ids, na.rm = TRUE): no non-missing arguments to max; returning
+    ## -Inf
+
+    ## `geom_line()`: Each group consists of only one observation.
+    ## ℹ Do you need to adjust the group aesthetic?
+
+``` r
 #Generate a list of ant species seen at each site
 ant_species_summary <- ants_long_data %>%
   group_by(Site) %>%
@@ -928,7 +1391,24 @@ ant_species_summary <- ants_long_data %>%
 
 #View the summarized data
 print(ant_species_summary)
+```
 
+    ## # A tibble: 11 × 2
+    ##    Site        Ant_Species                                                 
+    ##    <fct>       <chr>                                                       
+    ##  1 Aligarh     CaC, Crem, Tap                                              
+    ##  2 Bengaluru   Par, CaC, Tap, CaI, Myrm, CaP, Mon, Sol, Crem, Ano, Pol     
+    ##  3 Bhopal      CaP, Tap, CaC, Par                                          
+    ##  4 Gwalior     CaC                                                         
+    ##  5 Hampi       Tap, CaS, Mon, Par, ParB, Pol, Sol, Tec                     
+    ##  6 Hyderabad   Par, Crem, Tap, Lep, CaS, Mon, Sol, Cas1, CaP               
+    ##  7 Kanyakumari Tap, CaS, Par-, Crem, Lep, CaP, Par                         
+    ##  8 Koradi      Lep, CaC, CaI, Par, Tap, Mon                                
+    ##  9 Portblair   Sol, Crem, Tap, CaC, Par, Lep                               
+    ## 10 Ramnagar    Tec, CaC, CaP, CaI, Pol, ParB, Lep, Tap, Mon, Crem, Sol, Par
+    ## 11 Srirangam   Tap, CaR, Mer, Cas1, Par, Eco, Mon, CaC
+
+``` r
 unique_ant_species <- ants_long_data %>%
   dplyr::select(species) %>%
   distinct() %>%
@@ -942,368 +1422,254 @@ total_ant_species <- length(unique_ant_species)
 #write.csv(ant_species_summary, "ant_species_summary.csv", row.names = FALSE)
 ```
 
-
-Using the vegan package to investigate how ant communities vary across latitude
-
-
-```{r community characteristics, echo=FALSE}
-ants <- read.csv("Ant_abundance_all_natint_20May24.csv") #read in the abundance dataset
-
-ants$number1 <- as.numeric(as.character(ants$number1))
-ants$number2 <- as.numeric(as.character(ants$number2))
-ants$number3 <- as.numeric(as.character(ants$number3))
-ants$number4 <- as.numeric(as.character(ants$number4))
-
-#Removing Kenya points
-ants <- ants %>%
-  filter(!Site %in% c("Rumuruti1", "Rumuruti2"))
-
-ants_long_data <- ants%>%
-  pivot_longer(
-    cols = starts_with("species") | starts_with("number") | starts_with("feeding"),
-    names_to = c(".value", "group"),
-    names_pattern = "(species|number|feeding)(\\d)"
-  ) %>% drop_na(species)
-
-#this took out all the zero abundances
-
-write.csv(ants_long_data, "ant_ab_all_long.csv")
-
-#averaging across scans 1 to 6 for all days
-averaged_data1 <- ants_long_data %>%
-  filter(scan_no %in% 1:6) %>% 
-  group_by(Plant.ID, scan_day, species) %>% #
-  summarise(average_abundance = mean(number, na.rm = TRUE), .groups = 'drop') 
-
-#Averaging across days for all plants
-averaged_data2 <- averaged_data1 %>%
-  group_by(Plant.ID, species) %>% 
-  summarise(average_abundance = mean(average_abundance, na.rm = TRUE), .groups = 'drop') 
-
-
-#merging to get site IDs and latitudes
-site_lat_mapping <- ants_long_data %>%
-  dplyr::select(Plant.ID, Site, Lat) %>% 
-  distinct() 
-
-final_data <- merge(averaged_data2, site_lat_mapping, all.x = TRUE, all.y = FALSE)
-
-#Averaging for sites
-averaged_data3 <- final_data %>%
-  group_by(Site, Lat, species) %>% 
-  summarise(average_abundance = mean(average_abundance, na.rm = TRUE), .groups = 'drop') 
-
-species_abundance_matrix <- averaged_data3 %>%
-  pivot_wider(names_from = species, values_from = average_abundance, values_fill = list(average_abundance = 0)) %>%
-  dplyr::select(-Lat) %>%
-  distinct()
-
-latitude_data <- averaged_data3 %>%
-  dplyr::select(Site, Lat) %>%
-  distinct()
-
-final_matrix <- left_join(species_abundance_matrix, latitude_data, by = "Site")
-
-
-#Characterizing community composition
-sp_arranged <- final_matrix %>% 
-  dplyr::arrange(Lat)
-
-sp_final  <- sp_arranged %>% 
-  dplyr::select(-Lat, -Site)
-
-#calculating diversity indices
-
-simpson <- diversity(sp_final,index = "simpson")
-shannon <- diversity(sp_final)
-richness <- specnumber(sp_final)
-
-par(mfrow = c(1, 2))  
-plot(simpson)
-plot(shannon)
-
-par(mfrow = c(1, 2))  
-hist(simpson)
-hist(shannon)
-
-diversity_data <- data.frame(
-  Site = sp_arranged$Site,
-  Latitude = sp_arranged$Lat,
-  Shannon = shannon,
-  Richness = richness
-)
-
-#Define categories for colours
-diversity_data$Category <- ifelse(diversity_data$Site %in% c("Rumuruti1", "Rumuruti2"), "Native",
-                                  ifelse(diversity_data$Site == "Portblair", "Island", "Naturalized"))
-
-
-diversity_data$Category <- ifelse(diversity_data$Site == "Portblair", "Island", "Mainland")
-
-color_mapping <- c( "Island" = "turquoise", "Mainland" = "olivedrab")
-
-
-lm_shannon <- lm(Shannon ~ Latitude, data = diversity_data)
-summary(lm_shannon)
-
-lm_richness <- lm(Richness ~ Latitude, data = diversity_data)
-summary(lm_richness)
-#Non-significant
-
-#Let's run a linear model without Ramnagar
-diversity_data1 <- diversity_data %>%
-  filter(!Site == "Ramnagar")
-lm_shannon1 <- lm(Shannon ~ Latitude, data = diversity_data1)
-summary(lm_shannon1)
-#Marginally significant
-
-lm_richness1 <- lm(Richness ~ Latitude, data = diversity_data1)
-summary(lm_richness1)
-#Significant
-
-#Let's remove port blair, the island site
-diversity_data2 <- diversity_data %>%
-  filter(!Site == "Portblair")
-lm_shannon2 <- lm(Shannon ~ Latitude, data = diversity_data2)
-summary(lm_shannon2)
-#Not significant
-
-lm_richness2 <- lm(Richness ~ Latitude, data = diversity_data2)
-summary(lm_richness2)
-#Not Significant
-
-#Let's remove both
-diversity_data3 <- diversity_data %>%
-  filter(!Site %in% c("Portblair", "Ramnagar"))
-
-lm_shannon3 <- lm(Shannon ~ Latitude, data = diversity_data3)
-summary(lm_shannon3)
-#Not significant
-
-lm_richness3 <- lm(Richness ~ Latitude, data = diversity_data3)
-summary(lm_richness3)
-#Significant Significant
-
-
-r_squared_shannon <- summary(lm_shannon)$r.squared
-r_squared_richness <- summary(lm_richness)$r.squared
-
-p_value_shannon <- summary(lm_shannon)$coefficients[2, 4]
-p_value_richness <- summary(lm_richness)$coefficients[2, 4]
-
-label_shannon <- paste0("R² = ", format(r_squared_shannon, digits = 3), 
-                        ", p-value = ", format(p_value_shannon, digits = 3))
-label_richness <- paste0("R² = ", format(r_squared_richness, digits = 3), 
-                         ", p-value = ", format(p_value_richness, digits = 3))
-
-richness_plot <- ggplot(diversity_data, aes(x = Latitude, y = Richness, color = Category)) +
-  geom_point(size = 6) +
-  geom_smooth(method = "lm", se = FALSE, color = "black") +
-  xlab("Latitude") +
-  ylab("Species Richness") +
-  scale_color_manual(values = color_mapping) +
-  theme_classic() +
-  theme(
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(size = 17),
-    axis.title = element_text(size = 16),
-    axis.text = element_text(size = 15),
-    legend.position = "bottom",
-    legend.text = element_text(size = 13),
-    legend.title = element_text(size = 14)
-  ) +
-  annotate("text", x = Inf, y = Inf, label = label_richness, 
-           hjust = 1.1, vjust = 2, size = 7, color = "black")
-
-shannon_plot <- ggplot(diversity_data, aes(x = Latitude, y = Shannon, color = Category)) +
-  geom_point(size = 6) +
-  geom_smooth(method = "lm", se = FALSE, color = "black") +
-  xlab("Latitude") +
-  ylab("Shannon Diversity") +
-  scale_color_manual(values = color_mapping) +
-  theme_classic() +
-  theme(
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(size = 17),
-    axis.title = element_text(size = 16),
-    axis.text = element_text(size = 15),
-    legend.position = "bottom",
-    legend.text = element_text(size = 13),
-    legend.title = element_text(size = 14)
-  ) +
-  annotate("text", x = Inf, y = Inf, label = label_shannon, 
-           hjust = 1.1, vjust = 2, size = 7, color = "black")
-
-
-#Combine 
-divplot <- richness_plot + shannon_plot + plot_layout(guides = 'collect') & theme(legend.position = 'none') 
-
-#ggsave(filename = "diversity1s.png", plot = divplot, width = 10, height = 6, dpi = 300)
-
-#Calculating distances 
-par(mfrow = c(1, 2))
-bray = vegdist(sp_final, "bray") 
-gower = vegdist(sp_final, "gower")
-hist(bray, xlim = range(0.0,1.0))
-hist(gower, xlim = range(0.0,1.0))
-
-par(mfrow = c(1, 2))
-plot(bray)
-plot(gower)
-
-spAbund <- rowSums(sp_final)  #gives the number of individuals found in each plot
-spAbund #view observations per plot 
-
-raremin <- min(rowSums(sp_final))
-
-
-#NMDS
-sp_nmds  <- sp_arranged %>% 
-  dplyr::select(-Lat)
-
-spnmds <- as.data.frame(sp_nmds)
-
-rownames(spnmds) = spnmds[,1]
-
-#Remove the first column from the data frame
-spnmds = spnmds[,-1]
-
-NMDS=metaMDS(spnmds, k=2)
-
-#Basic NMDS plot
-#plot NMDS with site names and ant species
-
-plot(NMDS)
-
-dev.new()
-ordiplot(NMDS, type ='n') #Ordination plot function especially for congested plots
-orditorp(NMDS,display="species",col="red",air=0.01) #The function adds text or points to ordination plots
-orditorp(NMDS,display="sites",cex=1.25,air=0.01)
-
-sites_scores <- scores(NMDS, display = "sites")
-df_sites <- as.data.frame(sites_scores)
-df_sites$Latitude <- sp_arranged$Lat
-
-
-#Normalize latitude values to range between 0 and 1
-normalized_lat <- (sp_arranged$Lat - min(sp_arranged$Lat)) / (max(sp_arranged$Lat) - min(sp_arranged$Lat))
-
-#Use a color gradient function to map normalized latitudes to colors
-colors <- colorRampPalette(c("#9F025E", "#F9C929"))(length(unique(normalized_lat)))
-site_colors <- colors[rank(normalized_lat)]
-
-
-#Plotting
-ordiplot(NMDS, type = 'n')
-orditorp(NMDS, display = "species", col = "black", air = 0.01)
-
-
-#Add a legend for color gradient
-species_scores <- scores(NMDS, display = "species")
-site_scores <- scores(NMDS, display = "sites")
-
-
-#Ensure species names are unique in the data
-species_data <- data.frame(
-  NMDS1 = species_scores[, 1],
-  NMDS2 = species_scores[, 2],
-  Species = make.unique(rownames(species_scores))
-)
-
-#Create a data frame for site scores with site names, latitude, and categories
-site_data <- data.frame(
-  NMDS1 = site_scores[, 1],
-  NMDS2 = site_scores[, 2],
-  Site = rownames(site_scores),
-  Latitude = diversity_data$Latitude,
-  Category = diversity_data$Category
-)
-
-site_data$Category <- ifelse(site_data$Site == "Portblair", "Island", "Mainland")
-
-#Define a color mapping for the categories
-color_mapping <- c("Island" = "turquoise", "Mainland" = "olivedrab")
-
-
-p_nmds <- ggplot() +
-  geom_point(data = site_data, aes(x = NMDS1, y = NMDS2, fill = Category), shape = 21, size = 6) +
-  geom_point(data = species_data, aes(x = NMDS1, y = NMDS2), color = "black", size = 6, alpha = 0.1) +
-  geom_text(data = site_data, aes(x = NMDS1, y = NMDS2, label = Site, color = Latitude), size = 6,  nudge_y = 0.2) +
-  scale_fill_manual(values = color_mapping, name = "Category") +
-  scale_color_gradient(low = "#9F025E", high = "#F9C929", name = "Latitude") +
-  labs(
-       x = "NMDS1",
-       y = "NMDS2") +
-  theme_classic() +
-  theme(
-    axis.title.x = element_text(size = 16),
-    axis.title.y = element_text(size = 16),
-    axis.text.x = element_text(size = 16),
-    axis.text.y = element_text(size = 16),
-    legend.title = element_text(size = 16),
-    legend.text = element_text(size = 16),
-    panel.grid.major = element_blank(),  
-    panel.grid.minor = element_blank()   
-  ) +
-  guides(fill = guide_legend(override.aes = list(shape = 21)))
-
-#ggsave(filename = "nmds.png", plot = p_nmds, width = 11, height = 6, dpi = 300)
-
-#Combine all community plots
-comm_plot <- (divplot / p_nmds)  + plot_annotation(tag_levels = 'a') &
-  theme(plot.tag = element_text(size = 25))    # Using | ensures side-by-side layout
-
-ggsave(filename = "figure3.png", plot = comm_plot, width = 12, height = 14, dpi = 300)
-
-#Calculate PERMANOVA scores
-bray_curtis <- vegdist(spnmds, method = "bray")
-
-permanova_result <- adonis2(bray_curtis ~ sp_arranged$Lat, data = sp_arranged, permutations = 999)
-print(permanova_result)
-#Significant 
-
-#Let's calculate PERMANOVA scores without Ramnagar
-
-sp_arranged1 <- sp_arranged %>%
-  dplyr::filter(Site != "Ramnagar")
-
-bray_curtis_matrix <- as.matrix(bray_curtis)
-
-bray_curtis1<- bray_curtis_matrix[rownames(bray_curtis_matrix) != "Ramnagar", 
-                                                     colnames(bray_curtis_matrix) != "Ramnagar"]
-
-# Step 3: Convert the matrix back to a dist object
-bray_curtis1 <- as.dist(bray_curtis1)
-
-permanova_result1 <- adonis2(bray_curtis1 ~ sp_arranged1$Lat, data = sp_arranged1, permutations = 999)
-print(permanova_result1)
-
-#Let's calculate PERMANOVA scores without Port Blair
-
-sp_arranged2 <- sp_arranged %>%
-  dplyr::filter(Site != "Portblair")
-
-bray_curtis_matrix <- as.matrix(bray_curtis)
-
-bray_curtis2<- bray_curtis_matrix[rownames(bray_curtis_matrix) != "Portblair", 
-                                                     colnames(bray_curtis_matrix) != "Portblair"]
-
-#Step 3: Convert the matrix back to a dist object
-bray_curtis2 <- as.dist(bray_curtis2)
-
-permanova_result2 <- adonis2(bray_curtis2 ~ sp_arranged2$Lat, data = sp_arranged2, permutations = 999)
-print(permanova_result2)
-
-```
-##Structural equation modelling
-
-We implemented a structural equation model using the lavaan package to 
+Using the vegan package to investigate how ant communities vary across
+latitude
+
+    ## Warning: NAs introduced by coercion
+
+![](README_files/figure-gfm/community%20characteristics-1.png)<!-- -->![](README_files/figure-gfm/community%20characteristics-2.png)<!-- -->
+
+    ## 
+    ## Call:
+    ## lm(formula = Shannon ~ Latitude, data = diversity_data)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -1.15062 -0.13808 -0.06947  0.30550  0.69914 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)   
+    ## (Intercept)  1.78458    0.43088   4.142  0.00252 **
+    ## Latitude    -0.02417    0.02180  -1.109  0.29633   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.5074 on 9 degrees of freedom
+    ## Multiple R-squared:  0.1202, Adjusted R-squared:  0.0224 
+    ## F-statistic: 1.229 on 1 and 9 DF,  p-value: 0.2963
+
+    ## 
+    ## Call:
+    ## lm(formula = Richness ~ Latitude, data = diversity_data)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.7232 -2.3188 -0.3095  1.1113  6.6419 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)  
+    ## (Intercept)   8.8126     2.8454   3.097   0.0128 *
+    ## Latitude     -0.1178     0.1440  -0.818   0.4344  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 3.35 on 9 degrees of freedom
+    ## Multiple R-squared:  0.06922,    Adjusted R-squared:  -0.0342 
+    ## F-statistic: 0.6693 on 1 and 9 DF,  p-value: 0.4344
+
+    ## 
+    ## Call:
+    ## lm(formula = Shannon ~ Latitude, data = diversity_data1)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -0.90169 -0.18561  0.04651  0.26177  0.54475 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  2.06693    0.40970   5.045 0.000995 ***
+    ## Latitude    -0.04443    0.02210  -2.010 0.079263 .  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.4486 on 8 degrees of freedom
+    ## Multiple R-squared:  0.3356, Adjusted R-squared:  0.2525 
+    ## F-statistic: 4.041 on 1 and 8 DF,  p-value: 0.07926
+
+    ## 
+    ## Call:
+    ## lm(formula = Richness ~ Latitude, data = diversity_data1)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -2.8869 -1.6406  0.0166  1.2216  3.5585 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  11.4949     1.9706   5.833  0.00039 ***
+    ## Latitude     -0.3102     0.1063  -2.918  0.01934 *  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 2.158 on 8 degrees of freedom
+    ## Multiple R-squared:  0.5156, Adjusted R-squared:  0.4551 
+    ## F-statistic: 8.516 on 1 and 8 DF,  p-value: 0.01934
+
+    ## 
+    ## Call:
+    ## lm(formula = Shannon ~ Latitude, data = diversity_data2)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -1.1500 -0.1535 -0.0364  0.3453  0.7030 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)   
+    ## (Intercept)  1.81199    0.49528   3.658  0.00642 **
+    ## Latitude    -0.02524    0.02428  -1.039  0.32897   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.5375 on 8 degrees of freedom
+    ## Multiple R-squared:  0.119,  Adjusted R-squared:  0.008868 
+    ## F-statistic: 1.081 on 1 and 8 DF,  p-value: 0.329
+
+    ## 
+    ## Call:
+    ## lm(formula = Richness ~ Latitude, data = diversity_data2)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.7022 -2.1233 -0.2821  0.8384  6.7793 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)  
+    ## (Intercept)   9.7761     3.1551   3.099   0.0147 *
+    ## Latitude     -0.1553     0.1547  -1.004   0.3447  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 3.424 on 8 degrees of freedom
+    ## Multiple R-squared:  0.112,  Adjusted R-squared:  0.0009466 
+    ## F-statistic: 1.009 on 1 and 8 DF,  p-value: 0.3447
+
+    ## 
+    ## Call:
+    ## lm(formula = Shannon ~ Latitude, data = diversity_data3)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -0.8983 -0.2359  0.1596  0.2687  0.5382 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)   
+    ## (Intercept)  2.11560    0.47178   4.484  0.00285 **
+    ## Latitude    -0.04641    0.02463  -1.884  0.10157   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.4771 on 7 degrees of freedom
+    ## Multiple R-squared:  0.3364, Adjusted R-squared:  0.2417 
+    ## F-statistic: 3.549 on 1 and 7 DF,  p-value: 0.1016
+
+    ## 
+    ## Call:
+    ## lm(formula = Richness ~ Latitude, data = diversity_data3)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -2.7978 -0.7991  0.3234  0.9353  2.9932 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  12.7037     1.9447   6.532 0.000324 ***
+    ## Latitude     -0.3595     0.1015  -3.540 0.009469 ** 
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.967 on 7 degrees of freedom
+    ## Multiple R-squared:  0.6416, Adjusted R-squared:  0.5904 
+    ## F-statistic: 12.53 on 1 and 7 DF,  p-value: 0.009469
+
+![](README_files/figure-gfm/community%20characteristics-3.png)<!-- -->![](README_files/figure-gfm/community%20characteristics-4.png)<!-- -->
+
+    ##  [1] 39.256574 56.382812 18.645370 41.210283 50.440556 50.412604 19.916609
+    ##  [8]  6.416667  1.000000  5.026667 65.561667
+
+    ## Wisconsin double standardization
+    ## Run 0 stress 0.1444013 
+    ## Run 1 stress 0.1499244 
+    ## Run 2 stress 0.2397507 
+    ## Run 3 stress 0.1499244 
+    ## Run 4 stress 0.1398569 
+    ## ... New best solution
+    ## ... Procrustes: rmse 0.2003312  max resid 0.4118767 
+    ## Run 5 stress 0.1338938 
+    ## ... New best solution
+    ## ... Procrustes: rmse 0.18658  max resid 0.3910242 
+    ## Run 6 stress 0.1338938 
+    ## ... New best solution
+    ## ... Procrustes: rmse 2.687674e-05  max resid 5.2794e-05 
+    ## ... Similar to previous best
+    ## Run 7 stress 0.1372117 
+    ## Run 8 stress 0.1398571 
+    ## Run 9 stress 0.1372117 
+    ## Run 10 stress 0.139857 
+    ## Run 11 stress 0.1402498 
+    ## Run 12 stress 0.1338938 
+    ## ... Procrustes: rmse 3.406726e-05  max resid 7.859538e-05 
+    ## ... Similar to previous best
+    ## Run 13 stress 0.1394493 
+    ## Run 14 stress 0.1488845 
+    ## Run 15 stress 0.1338939 
+    ## ... Procrustes: rmse 0.0002549255  max resid 0.0005936822 
+    ## ... Similar to previous best
+    ## Run 16 stress 0.1338939 
+    ## ... Procrustes: rmse 0.0001746664  max resid 0.0004061532 
+    ## ... Similar to previous best
+    ## Run 17 stress 0.1424101 
+    ## Run 18 stress 0.1398572 
+    ## Run 19 stress 0.1453734 
+    ## Run 20 stress 0.1338939 
+    ## ... Procrustes: rmse 0.0001731091  max resid 0.0004001521 
+    ## ... Similar to previous best
+    ## *** Best solution repeated 5 times
+
+    ## `geom_smooth()` using formula = 'y ~ x'
+    ## `geom_smooth()` using formula = 'y ~ x'
+
+    ## Permutation test for adonis under reduced model
+    ## Permutation: free
+    ## Number of permutations: 999
+    ## 
+    ## adonis2(formula = bray_curtis ~ sp_arranged$Lat, data = sp_arranged, permutations = 999)
+    ##          Df SumOfSqs      R2      F Pr(>F)  
+    ## Model     1  0.53239 0.18741 2.0756  0.044 *
+    ## Residual  9  2.30847 0.81259                
+    ## Total    10  2.84086 1.00000                
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    ## Permutation test for adonis under reduced model
+    ## Permutation: free
+    ## Number of permutations: 999
+    ## 
+    ## adonis2(formula = bray_curtis1 ~ sp_arranged1$Lat, data = sp_arranged1, permutations = 999)
+    ##          Df SumOfSqs      R2      F Pr(>F)  
+    ## Model     1  0.67501 0.27145 2.9807   0.02 *
+    ## Residual  8  1.81167 0.72855                
+    ## Total     9  2.48669 1.00000                
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+    ## Permutation test for adonis under reduced model
+    ## Permutation: free
+    ## Number of permutations: 999
+    ## 
+    ## adonis2(formula = bray_curtis2 ~ sp_arranged2$Lat, data = sp_arranged2, permutations = 999)
+    ##          Df SumOfSqs      R2      F Pr(>F)  
+    ## Model     1  0.60006 0.22603 2.3363  0.034 *
+    ## Residual  8  2.05471 0.77397                
+    ## Total     9  2.65476 1.00000                
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+\##Structural equation modelling
+
+We implemented a structural equation model using the lavaan package to
 further understand relationships between variables.
 
-```{r structural equation modelling}
-
+``` r
 #Subsetting dataset to contain relevant variables
 
 semdata <- data[, c("Plant.ID", "Latitude", "width", "EFNLB", "EFNS", "pherb", "average_abundance", "fruitno", "Area_Leafbase", "Area_Petiole", "Vol_Leafbase", "Vol_Petiole")]
@@ -1313,7 +1679,34 @@ semdata_standardized$Plant.ID <- semdata$Plant.ID  #Add back the Plant.ID
 
 # Inspect the standardized data
 summary(semdata_standardized)
+```
 
+    ##     Latitude           width             EFNLB             EFNS         
+    ##  Min.   :-1.4997   Min.   :-1.5763   Min.   :-2.170   Min.   :-1.44699  
+    ##  1st Qu.:-0.8023   1st Qu.:-0.6734   1st Qu.:-1.127   1st Qu.:-0.82368  
+    ##  Median :-0.2054   Median :-0.1424   Median : 0.137   Median :-0.06013  
+    ##  Mean   : 0.0000   Mean   : 0.0000   Mean   : 0.000   Mean   : 0.00000  
+    ##  3rd Qu.: 1.0401   3rd Qu.: 0.5215   3rd Qu.: 0.769   3rd Qu.: 0.44890  
+    ##  Max.   : 1.4780   Max.   : 4.1861   Max.   : 2.665   Max.   : 3.09425  
+    ##  NA's   :1         NA's   :6                                            
+    ##      pherb         average_abundance    fruitno        Area_Leafbase     
+    ##  Min.   :-1.9218   Min.   :-0.6559   Min.   :-0.5151   Min.   :-2.20981  
+    ##  1st Qu.:-0.7659   1st Qu.:-0.5356   1st Qu.:-0.5151   1st Qu.:-0.66717  
+    ##  Median : 0.1973   Median :-0.3908   Median :-0.5151   Median :-0.07306  
+    ##  Mean   : 0.0000   Mean   : 0.0000   Mean   : 0.0000   Mean   : 0.00000  
+    ##  3rd Qu.: 0.8716   3rd Qu.: 0.1860   3rd Qu.: 0.1582   3rd Qu.: 0.59766  
+    ##  Max.   : 1.1606   Max.   : 5.7583   Max.   : 6.2178   Max.   : 2.21229  
+    ##                                      NA's   :1         NA's   :102       
+    ##   Area_Petiole      Vol_Leafbase      Vol_Petiole        Plant.ID        
+    ##  Min.   :-1.6804   Min.   :-1.2000   Min.   :-1.4766   Length:164        
+    ##  1st Qu.:-0.6680   1st Qu.:-0.6499   1st Qu.:-0.8222   Class :character  
+    ##  Median :-0.1546   Median :-0.4784   Median :-0.2107   Mode  :character  
+    ##  Mean   : 0.0000   Mean   : 0.0000   Mean   : 0.0000                     
+    ##  3rd Qu.: 0.6297   3rd Qu.: 0.7288   3rd Qu.: 0.5929                     
+    ##  Max.   : 3.1571   Max.   : 2.3398   Max.   : 2.3889                     
+    ##  NA's   :111       NA's   :139       NA's   :139
+
+``` r
 #model specification
 model12 <- '
   average_abundance ~ Latitude + EFNLB + EFNS
@@ -1361,7 +1754,11 @@ cor_matrix <- cor(predictors, use = "complete.obs")
 
 #Visualize
 corrplot(cor_matrix, method = "circle")
+```
 
+![](README_files/figure-gfm/structural%20equation%20modelling-1.png)<!-- -->
+
+``` r
 #Nothing concerning
 
 #Inspect VIF values
@@ -1374,11 +1771,42 @@ vif_fru <- lm(fruitno ~ pherb + average_abundance + Latitude + EFNLB + EFNS +  w
 
 #Compute VIF
 vif(vif_ab)
-vif(vif_herb)
-vif(vif_lb)
-vif(vif_s)
-vif(vif_fru)
+```
 
+    ## Latitude    EFNLB     EFNS 
+    ## 1.084315 1.498019 1.486488
+
+``` r
+vif(vif_herb)
+```
+
+    ##          Latitude average_abundance             EFNLB              EFNS 
+    ##          1.241201          1.179277          1.515174          1.578498
+
+``` r
+vif(vif_lb)
+```
+
+    ## Latitude    width 
+    ## 1.017577 1.017577
+
+``` r
+vif(vif_s)
+```
+
+    ## Latitude    width 
+    ## 1.017577 1.017577
+
+``` r
+vif(vif_fru)
+```
+
+    ##             pherb average_abundance          Latitude             EFNLB 
+    ##          1.172385          1.207469          1.382929          1.518952 
+    ##              EFNS             width 
+    ##          1.598683          1.048953
+
+``` r
 #collinearity not an issue
 
 #Adding correlated errors
@@ -1471,5 +1899,4 @@ sem_plot <- (sem_apriori / sem_sig)  + plot_annotation(tag_levels = 'a') &
   theme(plot.tag = element_text(size = 25))  
 
 ggsave(filename = "figure4.png", plot = sem_plot, width = 12, height = 12, dpi = 300)
-
 ```
