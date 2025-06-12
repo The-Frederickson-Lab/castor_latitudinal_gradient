@@ -1860,10 +1860,10 @@ ggsave("figure2.png", final_plot, width = 11.5, height = 12)
     ## Warning: Removed 110 rows containing missing values or values outside the scale range
     ## (`geom_point()`).
 
-    ## Warning: Removed 6 rows containing missing values or values outside the scale range
+    ## Warning: Removed 10 rows containing missing values or values outside the scale range
     ## (`geom_point()`).
 
-    ## Warning: Removed 5 rows containing missing values or values outside the scale range
+    ## Warning: Removed 11 rows containing missing values or values outside the scale range
     ## (`geom_point()`).
 
 How does seed size and elaiosome/seed mass vary across latitude?
@@ -2222,48 +2222,51 @@ latitude
 
     ## Wisconsin double standardization
     ## Run 0 stress 0.09286488 
-    ## Run 1 stress 0.09286505 
-    ## ... Procrustes: rmse 0.000236948  max resid 0.00052105 
-    ## ... Similar to previous best
-    ## Run 2 stress 0.1047489 
-    ## Run 3 stress 0.09286471 
+    ## Run 1 stress 0.2588647 
+    ## Run 2 stress 0.09286486 
     ## ... New best solution
-    ## ... Procrustes: rmse 0.0002720879  max resid 0.0005605709 
+    ## ... Procrustes: rmse 0.0008352369  max resid 0.001839115 
     ## ... Similar to previous best
-    ## Run 4 stress 0.09286475 
-    ## ... Procrustes: rmse 8.780532e-05  max resid 0.0002203438 
+    ## Run 3 stress 0.09286477 
+    ## ... New best solution
+    ## ... Procrustes: rmse 0.0006919014  max resid 0.001610502 
     ## ... Similar to previous best
-    ## Run 5 stress 0.09286483 
-    ## ... Procrustes: rmse 0.0005037066  max resid 0.001124941 
+    ## Run 4 stress 0.09286515 
+    ## ... Procrustes: rmse 0.0009241218  max resid 0.002050274 
     ## ... Similar to previous best
-    ## Run 6 stress 0.1047491 
-    ## Run 7 stress 0.1047491 
-    ## Run 8 stress 0.104749 
-    ## Run 9 stress 0.2299804 
-    ## Run 10 stress 0.1047493 
-    ## Run 11 stress 0.09286475 
-    ## ... Procrustes: rmse 0.0001958291  max resid 0.0004657113 
+    ## Run 5 stress 0.1150362 
+    ## Run 6 stress 0.1047489 
+    ## Run 7 stress 0.09286492 
+    ## ... Procrustes: rmse 0.0006270422  max resid 0.001378805 
     ## ... Similar to previous best
-    ## Run 12 stress 0.1047489 
+    ## Run 8 stress 0.09286505 
+    ## ... Procrustes: rmse 0.0003008102  max resid 0.0007498599 
+    ## ... Similar to previous best
+    ## Run 9 stress 0.1047489 
+    ## Run 10 stress 0.09286502 
+    ## ... Procrustes: rmse 0.0008168265  max resid 0.002012111 
+    ## ... Similar to previous best
+    ## Run 11 stress 0.1047492 
+    ## Run 12 stress 0.09286479 
+    ## ... Procrustes: rmse 2.914143e-05  max resid 7.290828e-05 
+    ## ... Similar to previous best
     ## Run 13 stress 0.1047489 
-    ## Run 14 stress 0.09286527 
-    ## ... Procrustes: rmse 0.0005871693  max resid 0.001474036 
+    ## Run 14 stress 0.1157047 
+    ## Run 15 stress 0.09286514 
+    ## ... Procrustes: rmse 0.0003235503  max resid 0.0008001435 
     ## ... Similar to previous best
-    ## Run 15 stress 0.09286515 
-    ## ... Procrustes: rmse 0.0007562462  max resid 0.001871355 
+    ## Run 16 stress 0.09286489 
+    ## ... Procrustes: rmse 0.0001585076  max resid 0.0003959273 
     ## ... Similar to previous best
-    ## Run 16 stress 0.1047491 
-    ## Run 17 stress 0.0928648 
-    ## ... Procrustes: rmse 0.0003641957  max resid 0.000632605 
+    ## Run 17 stress 0.09286489 
+    ## ... Procrustes: rmse 8.867248e-05  max resid 0.0001943733 
     ## ... Similar to previous best
-    ## Run 18 stress 0.09286514 
-    ## ... Procrustes: rmse 0.0004711407  max resid 0.0007959646 
+    ## Run 18 stress 0.104749 
+    ## Run 19 stress 0.09286483 
+    ## ... Procrustes: rmse 0.0001128293  max resid 0.0001921338 
     ## ... Similar to previous best
-    ## Run 19 stress 0.09286506 
-    ## ... Procrustes: rmse 0.0004269913  max resid 0.001070485 
-    ## ... Similar to previous best
-    ## Run 20 stress 0.1047488 
-    ## *** Best solution repeated 9 times
+    ## Run 20 stress 0.1081466 
+    ## *** Best solution repeated 10 times
 
     ## `geom_smooth()` using formula = 'y ~ x'
     ## `geom_smooth()` using formula = 'y ~ x'
@@ -2274,7 +2277,7 @@ latitude
     ## 
     ## adonis2(formula = bray_curtis ~ sp_arranged$Lat, data = sp_arranged, permutations = 999)
     ##          Df SumOfSqs      R2      F Pr(>F)  
-    ## Model     1  0.60006 0.22603 2.3363  0.042 *
+    ## Model     1  0.60006 0.22603 2.3363  0.025 *
     ## Residual  8  2.05471 0.77397                
     ## Total     9  2.65476 1.00000                
     ## ---
